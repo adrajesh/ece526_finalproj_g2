@@ -58,9 +58,9 @@ int main(int argc, char* argv[]) {
 	std::string line;
 	std::ifstream infile;
 	unsigned int trace[2];
-	unsigned int instruction;
-	unsigned int trace_pc;
-	unsigned int opcode;
+	uint32_t instr;
+	uint32_t trace_pc;
+	uint32_t opcode, funct3, funct7, rd, rs1, rs2;
 	
 	switch (argc) {
 		case 1: infile.open(I_FILENAME);			// No Arguments provided. Read program.mem, pc 0, sa 65535, verbose disabled
@@ -115,43 +115,125 @@ int main(int argc, char* argv[]) {
 	while(std::getline(infile, line)){
 		parse_line(line,trace);
 		trace_pc= trace[0];
-		instruction= trace[1];
+		instr= trace[1];
 		
 		if(trace_pc==pc){
-			cout<<"pc: "<<std::hex<<trace_pc<<" instr: "<<std::hex<<instruction<<endl;
-			opcode= instruction&127;
-			cout<<"opcode: "<<opcode<<endl;
-			switch (opcode){                       //all case statement opcodes are in decimal form
-				case 3: cout<<opcode<<endl; 
+			cout<<endl<<"pc: "<<std::hex<<std::uppercase<<trace_pc<<" instr: "<<std::hex<<instr<<endl;
+			
+			// Store everything regardless of instr type 
+			opcode = instr & (0x7F);								// bits [6:0]
+			funct3 = (instr & (0x7000)) >> 12;						// bits [14:12]
+			funct7 = (instr & (0xFE000000)) >> 25;					// bits [31:25]
+			rd = (instr & (0xF80)) >> 7;							// bits [11:7]
+			rs1 = (instr & (0xF8000)) >> 15;						// bits [19:15]
+			rs2 = (instr & (0x1F00000)) >> 20;						// bits [24:20]
+			// We have to calculate immediate fields also - refer page 16/17
+			
+			// Enable this in debug mode
+			cout<<std::uppercase<<std::hex<<"Opcode: "<<opcode<<" funct3: "<<funct3<<" funct7: "<<funct7<<endl;
+			cout<<std::uppercase<<std::hex<<"rd: "<<rd<<" rs1: "<<rs1<<" rs2: "<<rs2<<endl;
+			
+			switch(opcode) {
+				case 0x33: cout<<"R-type Instruction"<<endl;
+					switch(funct7) {
+						case 0x00:
+							switch(funct3) {
+								case 0x00: 	cout<<"ADD detected"<<endl;
+											// Operation here
+								break;
+								
+								case 0x01: 	cout<<"SLL detected"<<endl;
+											// Operation here
+								break;
+								
+								case 0x02:	cout<<"SLT detected"<<endl;
+											// Operation here
+								break;
+								
+								case 0x03:	cout<<"SLTU detected"<<endl;
+											// Operation here
+								break;
+								
+								case 0x04:	cout<<"XOR detected"<<endl;
+											// Operation here
+								break;
+								
+								case 0x05:	cout<<"SRL detected"<<endl;
+											// Operation here
+								break;
+								
+								case 0x06:	cout<<"OR detected"<<endl;
+											// Operation here
+								break;
+								
+								case 0x07:	cout<<"AND detected"<<endl;
+											// Operation here
+								break;
+							}
 						break;
-				case 15: cout<<opcode<<endl; 
+						
+						case 0x20:
+							switch(funct3) {
+								case 0x00:	cout<<"SUB detected"<<endl;
+											// Operation here
+								break;
+								
+								case 0x05: cout<<"SRA detected"<<endl;
+											// Operation here
+								break;
+							}
 						break;
-				case 19: cout<<opcode<<endl; 
-						break;
-				case 23: cout<<opcode<<endl; 
-						break;
-				case 35: cout<<opcode<<endl; 
-						break;
-				case 51: cout<<opcode<<endl; 
-						break;
-				case 55: cout<<opcode<<endl; 
-						break;
-				case 99: cout<<opcode<<endl; 
-						break;
-				case 103: cout<<opcode<<endl; 
-						break;
-				case 111: cout<<opcode<<endl; 
-						break;
-				case 115: cout<<opcode<<endl; 
-						break;
+					}
+				break;
+					
+				case 0x03: cout<<"I-type Instruction"<<endl;
+				// LB, LH, LW, LBU, LHU
+				break;
+				
+				case 0x13: cout<<"I-type Instruction"<<endl;
+				// ADDI, SLTI, SLTIU, XORI, ORI, ANDI 
+				break;
+				
+				case 0x67: cout<<"I-type Instruction"<<endl;
+				// only JALR!
+				break;
+				
+				case 0x23: cout<<"S-type Instruction"<<endl;
+				// SB,SH,SW
+				break;
+				
+				case 0x63: cout<<"B-type Instruction"<<endl;
+				// BEQ, BNE, BLT, BGE, BLTU, BGEU
+				break;
+				
+				case 0x37: cout<<"U-type Instruction"<<endl;
+				// LUI
+				break;
+				
+				case 0x17: cout<<"U-type Instruction"<<endl;
+				// AUIPC
+				break;
+				
+				case 0x6F: cout<<"J-type Instruction"<<endl;
+				// JAL
+				break;
+				
+				// !!! Need to check on SLLI, SRLI and SRAI - opcode is 0x13, but not I type? !!!
+				
+				case 0x0F: cout<<"FENCE detected"<<endl;
+				// FENCE
+				break;
+				
+				case 0x73: cout<<"ECALL/EBREAK detected"<<endl;
+				// ECALL, EBREAK
+				break;
+				
 				default: cout<<"Opcode doesn't exist"<<endl; 
-						break;
+				break;
 			}
 			pc= pc+4;
 		}
 	}
-	
 	infile.close();
-	
 	return 0;
 }
