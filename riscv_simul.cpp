@@ -60,6 +60,7 @@ int main(int argc, char* argv[]) {
 	unsigned int trace[2];
 	unsigned int instruction;
 	unsigned int trace_pc;
+	unsigned int opcode;
 	
 	switch (argc) {
 		case 1: infile.open(I_FILENAME);			// No Arguments provided. Read program.mem, pc 0, sa 65535, verbose disabled
@@ -105,7 +106,7 @@ int main(int argc, char* argv[]) {
 		default: usage();
 		}
 	cout<<endl<<"WELCOME TO RISC-V SIMULATOR"<<endl;
-	cout<<"Program Counter - "<<pc<<endl;
+	cout<<"Program Counter - "<<std::hex<<pc<<endl;
 	cout<<"Stack Address - "<<sa<<endl;
 	cout<<"Debug mode - "<<DebugMode<<endl;
 	
@@ -118,6 +119,34 @@ int main(int argc, char* argv[]) {
 		
 		if(trace_pc==pc){
 			cout<<"pc: "<<std::hex<<trace_pc<<" instr: "<<std::hex<<instruction<<endl;
+			opcode= instruction&127;
+			cout<<"opcode: "<<opcode<<endl;
+			switch (opcode){                       //all case statement opcodes are in decimal form
+				case 3: cout<<opcode<<endl; 
+						break;
+				case 15: cout<<opcode<<endl; 
+						break;
+				case 19: cout<<opcode<<endl; 
+						break;
+				case 23: cout<<opcode<<endl; 
+						break;
+				case 35: cout<<opcode<<endl; 
+						break;
+				case 51: cout<<opcode<<endl; 
+						break;
+				case 55: cout<<opcode<<endl; 
+						break;
+				case 99: cout<<opcode<<endl; 
+						break;
+				case 103: cout<<opcode<<endl; 
+						break;
+				case 111: cout<<opcode<<endl; 
+						break;
+				case 115: cout<<opcode<<endl; 
+						break;
+				default: cout<<"Opcode doesn't exist"<<endl; 
+						break;
+			}
 			pc= pc+4;
 		}
 	}
