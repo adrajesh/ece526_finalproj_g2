@@ -61,6 +61,7 @@ int main(int argc, char* argv[]) {
 	uint32_t instr;
 	uint32_t trace_pc;
 	uint32_t opcode, funct3, funct7, rd, rs1, rs2;
+	uint32_t II,SI,BI,UI,JI; 						// Immediate fields 
 	
 	switch (argc) {
 		case 1: infile.open(I_FILENAME);			// No Arguments provided. Read program.mem, pc 0, sa 65535, verbose disabled
@@ -187,35 +188,139 @@ int main(int argc, char* argv[]) {
 				break;
 					
 				case 0x03: cout<<"I-type Instruction"<<endl;
-				// LB, LH, LW, LBU, LHU
+					II = (instr & (0xFFF00000))>>20;					// I-immediate
+					cout<<"I-immediate: "<<II<<endl;
+					// LB, LH, LW, LBU, LHU
+					switch(funct3) {
+						case 0x00:	cout<<"LB detected"<<endl;
+									// Operation here
+						break;
+						
+						case 0x01: cout<<"LH detected"<<endl;
+									// Operation here
+						break;
+						
+						case 0x02: cout<<"LW detected"<<endl;
+									// Operation here
+						break;
+						
+						case 0x04: cout<<"LBU detected"<<endl;
+									// Operation here
+						break;
+						
+						case 0x05: cout<<"LHU detected"<<endl;
+									// Operation here
+						break;
+					}
 				break;
 				
 				case 0x13: cout<<"I-type Instruction"<<endl;
-				// ADDI, SLTI, SLTIU, XORI, ORI, ANDI 
+					II = (instr & (0xFFF00000))>>20;					// I-immediate
+					cout<<"I-immediate: "<<II<<endl;
+					// ADDI, SLTI, SLTIU, XORI, ORI, ANDI 
+					switch(funct3) {
+						case 0x00:	cout<<"ADDI detected"<<endl;
+									// Operation here
+						break;
+						
+						case 0x02: cout<<"SLTI detected"<<endl;
+									// Operation here
+						break;
+						
+						case 0x03: cout<<"SLTIU detected"<<endl;
+									// Operation here
+						break;
+						
+						case 0x04: cout<<"XORI detected"<<endl;
+									// Operation here
+						break;
+						
+						case 0x06: cout<<"ORI detected"<<endl;
+									// Operation here
+						break;
+						
+						case 0x07: cout<<"ANDI detected"<<endl;
+									// Operation here
+						break;
+					}
 				break;
 				
 				case 0x67: cout<<"I-type Instruction"<<endl;
-				// only JALR!
+					II = (instr & (0xFFF00000))>>20;					// I-immediate
+					cout<<"I-immediate: "<<II<<endl;
+					// only JALR!
+					cout<<"JALR detected"<<endl;
 				break;
 				
 				case 0x23: cout<<"S-type Instruction"<<endl;
+					SI = ((instr & (0xF80))>>7) | ((instr & (0xFE000000))>>20);
+					cout<<"S immediate: "<<SI<<endl;
 				// SB,SH,SW
+					switch(funct3) {
+						case 0x00:	cout<<"SB detected"<<endl;
+									// Operation here
+						break;
+						
+						case 0x01: cout<<"SH detected"<<endl;
+									// Operation here
+						break;
+						
+						case 0x02: cout<<"SW detected"<<endl;
+									// Operation here
+						break;
+					}
 				break;
 				
 				case 0x63: cout<<"B-type Instruction"<<endl;
-				// BEQ, BNE, BLT, BGE, BLTU, BGEU
+					// BEQ, BNE, BLT, BGE, BLTU, BGEU
+					//BI = (instr & (0xFFF00000))>>20;					// B-immediate
+					//cout<<"B-immediate: "<<BI<<endl;
+					switch(funct3) {
+						case 0x00:	cout<<"BEQ detected"<<endl;
+									// Operation here
+						break;
+						
+						case 0x01: cout<<"BNE detected"<<endl;
+									// Operation here
+						break;
+						
+						case 0x04: cout<<"BLT detected"<<endl;
+									// Operation here
+						break;
+						
+						case 0x05: cout<<"BGE detected"<<endl;
+									// Operation here
+						break;
+						
+						case 0x06: cout<<"BLTU detected"<<endl;
+									// Operation here
+						break;
+						
+						case 0x07: cout<<"BGEU detected"<<endl;
+									// Operation here
+						break;
+					}
 				break;
 				
 				case 0x37: cout<<"U-type Instruction"<<endl;
-				// LUI
+					// LUI
+					//UI = ;					// U-immediate
+					//cout<<"U-immediate: "<<UI<<endl;
+					cout<<"LUI detected"<<endl;
 				break;
 				
 				case 0x17: cout<<"U-type Instruction"<<endl;
-				// AUIPC
+					// AUIPC
+					//UI = ;					// U-immediate
+					//cout<<"U-immediate: "<<UI<<endl;
+					cout<<"AUIPC detected"<<endl;
 				break;
 				
 				case 0x6F: cout<<"J-type Instruction"<<endl;
-				// JAL
+					// JAL
+					//UI = ;					// J-immediate
+					//cout<<"J-immediate: "<<JI<<endl;
+					cout<<"JAL detected"<<endl;
 				break;
 				
 				// !!! Need to check on SLLI, SRLI and SRAI - opcode is 0x13, but not I type? !!!
