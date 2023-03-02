@@ -254,6 +254,7 @@ int main(int argc, char* argv[]) {
 				
 				case 0x23: cout<<"S-type Instruction"<<endl;
 					SI = ((instr & (0xF80))>>7) | ((instr & (0xFE000000))>>20);
+					//SI = rd | funct7;
 					cout<<"S immediate: "<<SI<<endl;
 				// SB,SH,SW
 					switch(funct3) {
@@ -273,8 +274,8 @@ int main(int argc, char* argv[]) {
 				
 				case 0x63: cout<<"B-type Instruction"<<endl;
 					// BEQ, BNE, BLT, BGE, BLTU, BGEU
-					//BI = (instr & (0xFFF00000))>>20;					// B-immediate
-					//cout<<"B-immediate: "<<BI<<endl;
+					BI = 0 | ((instr & (0xF00))>>8) | ((instr & (0x7E000000))>>25) | ((instr & (0x80))>>7) | ((instr & (0x80000000))>>31);					// B-immediate
+					cout<<"B-immediate: "<<BI<<endl;
 					switch(funct3) {
 						case 0x00:	cout<<"BEQ detected"<<endl;
 									// Operation here
@@ -304,21 +305,21 @@ int main(int argc, char* argv[]) {
 				
 				case 0x37: cout<<"U-type Instruction"<<endl;
 					// LUI
-					//UI = ;					// U-immediate
-					//cout<<"U-immediate: "<<UI<<endl;
+					UI = 0x000 | (instr & (0xFFFFF000));					// U-immediate
+					cout<<"U-immediate: "<<UI<<endl;
 					cout<<"LUI detected"<<endl;
 				break;
 				
 				case 0x17: cout<<"U-type Instruction"<<endl;
 					// AUIPC
-					//UI = ;					// U-immediate
-					//cout<<"U-immediate: "<<UI<<endl;
+					UI = 0x000 | (instr & (0xFFFFF000));;					// U-immediate
+					cout<<"U-immediate: "<<UI<<endl;
 					cout<<"AUIPC detected"<<endl;
 				break;
 				
 				case 0x6F: cout<<"J-type Instruction"<<endl;
 					// JAL
-					//UI = ;					// J-immediate
+					UI = 0 | ((instr & (0xFE000000))>>21) | ((instr & (0x100000))>>20) | ((instr & (0xFF000))>>12) | ((instr & (0x8000000))>>31);					// J-immediate
 					//cout<<"J-immediate: "<<JI<<endl;
 					cout<<"JAL detected"<<endl;
 				break;
