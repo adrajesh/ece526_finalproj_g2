@@ -7,6 +7,7 @@
 #include <string.h>
 #include <cctype>
 #include <cstring>
+#include "immediate_field.cpp"
 
 using namespace std;
 
@@ -190,13 +191,8 @@ int main(int argc, char* argv[]) {
 				break;
 					
 				case 0x03: cout<<"I-type Instruction"<<endl;
-					II = (instr & (0xFFF00000))>>20;					// I-immediate
-					MSBimmediate= II>>11;                               //check the MSB of 12 bit immediate field
-					if(MSBimmediate){                                   
-						II= (II + 0xFFFFF000);                             //extend 1 from 12th bit to 31th bit
-					}
-					cout<<"I-immediate: "<<II<<endl;
 					// LB, LH, LW, LBU, LHU
+					II=immediate(opcode,instr);
 					switch(funct3) {
 						case 0x00:	cout<<"LB detected"<<endl;
 									// Operation here
@@ -221,13 +217,8 @@ int main(int argc, char* argv[]) {
 				break;
 				
 				case 0x13: cout<<"I-type Instruction"<<endl;
-					II = (instr & (0xFFF00000))>>20;					// I-immediate
-					MSBimmediate= II>>11;                               //check the MSB of 12 bit immediate field
-					if(MSBimmediate){                                   
-						II= (II + 0xFFFFF000);                             //extend 1 from 12th bit to 31th bit
-					}
-					cout<<"I-immediate: "<<II<<endl;
 					// ADDI, SLTI, SLTIU, XORI, ORI, ANDI 
+					II=immediate(opcode,instr);
 					switch(funct3) {
 						case 0x00:	cout<<"ADDI detected"<<endl;
 									// Operation here
@@ -256,24 +247,14 @@ int main(int argc, char* argv[]) {
 				break;
 				
 				case 0x67: cout<<"I-type Instruction"<<endl;
-					II = (instr & (0xFFF00000))>>20;					// I-immediate
-					MSBimmediate= II>>11;                               //check the MSB of 12 bit immediate field
-					if(MSBimmediate){                                   
-						II= (II + 0xFFFFF000);                             //extend 1 from 12th bit to 31th bit
-					}
-					cout<<"I-immediate: "<<II<<endl;
 					// only JALR!
+					II=immediate(opcode,instr);
 					cout<<"JALR detected"<<endl;
 				break;
 				
 				case 0x23: cout<<"S-type Instruction"<<endl;
-					SI = ((instr & (0xF80))>>7) | ((instr & (0xFE000000))>>20);         //S-immediate
-					MSBimmediate= SI>>11;                               //check the MSB of 12 bit immediate field
-					if(MSBimmediate){                                   
-						SI= (SI + 0xFFFFF000);                             //extend 1 from 12th bit to 31th bit
-					}
-					cout<<"S immediate: "<<SI<<endl;
-				// SB,SH,SW
+					// SB,SH,SW
+					SI=immediate(opcode,instr);
 					switch(funct3) {
 						case 0x00:	cout<<"SB detected"<<endl;
 									// Operation here
@@ -291,12 +272,7 @@ int main(int argc, char* argv[]) {
 				
 				case 0x63: cout<<"B-type Instruction"<<endl;
 					// BEQ, BNE, BLT, BGE, BLTU, BGEU
-					BI = 0 | ((instr & (0xF00))>>8) | ((instr & (0x7E000000))>>25) | ((instr & (0x80))>>7) | ((instr & (0x80000000))>>31);					// B-immediate
-					MSBimmediate= II>>12;                               //check the MSB of 13 bit immediate field
-					if(MSBimmediate){                                   
-						BI= (BI + 0xFFFFE000);                             //extend 1 from 13th bit to 31th bit
-					}
-					cout<<"B-immediate: "<<BI<<endl;
+					BI=immediate(opcode,instr);
 					switch(funct3) {
 						case 0x00:	cout<<"BEQ detected"<<endl;
 									// Operation here
@@ -326,26 +302,19 @@ int main(int argc, char* argv[]) {
 				
 				case 0x37: cout<<"U-type Instruction"<<endl;
 					// LUI
-					UI = 0x000 | (instr & (0xFFFFF000));					// U-immediate
-					cout<<"U-immediate: "<<UI<<endl;
+					UI=immediate(opcode,instr);
 					cout<<"LUI detected"<<endl;
 				break;
 				
 				case 0x17: cout<<"U-type Instruction"<<endl;
 					// AUIPC
-					UI = 0x000 | (instr & (0xFFFFF000));;					// U-immediate
-					cout<<"U-immediate: "<<UI<<endl;
+					UI=immediate(opcode,instr);
 					cout<<"AUIPC detected"<<endl;
 				break;
 				
 				case 0x6F: cout<<"J-type Instruction"<<endl;
 					// JAL
-					UI = 0 | ((instr & (0xFE000000))>>21) | ((instr & (0x100000))>>20) | ((instr & (0xFF000))>>12) | ((instr & (0x8000000))>>31);					// J-immediate
-					MSBimmediate= JI>>20;                               //check the MSB of 12 bit immediate field
-					if(MSBimmediate){                                   
-						JI= (JI + 0xFFFE00000);                             //extend 1 from 21th bit to 31th bit
-					}
-					cout<<"J-immediate: "<<JI<<endl;
+					JI=immediate(opcode,instr);
 					cout<<"JAL detected"<<endl;
 				break;
 				
