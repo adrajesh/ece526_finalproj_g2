@@ -12,8 +12,17 @@
 using namespace std;
 
 #define PC_LOC 0
-#define STACK_ADDR 65535
+#define STACK_ADDR 65536
 #define I_FILENAME "program.mem"
+
+// Global vars
+int DebugMode;
+int pc; 				// program counter
+int sa;					// stack address
+int file;
+// uint32_t registers[32];
+uint8_t memory_array [65536] = {};		// Memory in bytes
+uint32_t r[32] = {}; 					// r0 is zero
 
 // Prints the usage of the program.
 void usage()
@@ -21,7 +30,7 @@ void usage()
     std::cerr << endl <<"Usage: riscv_simul <input file> <program counter> <stack address> <mode>" << endl;
     std::cerr << "input file \t- default is program.mem. Provide filename to read a specific file" << endl;
 	std::cerr << "program counter - default is 0" << endl;
-	std::cerr << "stck address \t- default is 65535" << endl;
+	std::cerr << "stck address \t- default is 65536" << endl;
 	std::cerr << "mode \t\t- default is silent. pass 'debug' to enable debug mode " << endl;		// we can later add normal mode also if needed
 	std::cerr << "Example - \'riscv_simul abcd.mem 4 65535 debug\'" << endl;
     exit(1);
@@ -49,12 +58,18 @@ void parse_line(std::string access,unsigned int arr[]) {
 	arr[1]=instruction;
 }
 
-// Global vars
-int DebugMode;
-int pc; 				// program counter
-int sa;					// stack address
-int file;
-uint32_t registers[32];
+void print_regs() {
+	// Print all contents of 32 register
+	int count = 0;
+	for(int i=0;i<32;i++) {
+		cout<<"x["<<std::dec<<i<<"]"<<" - "<<std::hex<<std::setw(8)<<setfill('0')<<r[i]<<" \t " ;
+		count++;
+		if (count%8==0) {
+			cout<<endl;
+		}
+	}
+	cout<<endl;
+}
 
 int main(int argc, char* argv[]) {
 	std::string line;
@@ -332,6 +347,9 @@ int main(int argc, char* argv[]) {
 				break;
 			}
 			pc= pc+4;
+			r[1] = 0xFFFFFFFF; 	// some dummy values to check
+			r[2] = 0xFFFF;		// some dummy values to check
+			print_regs();
 		}
 	}
 	infile.close();
