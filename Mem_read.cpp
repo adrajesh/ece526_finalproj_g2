@@ -14,10 +14,7 @@ int main()
     uint8_t memory_array[65536] = {};
     int byte1, byte2, byte3, byte4;
     uint32_t memory_content;
-    for (int i = 30; i < 34; i++) {
-        memory_array[i] = i;
-        std::cout << memory_array[i] << std::endl;
-    }
+    
     byte1 = memory_array[gp];
     byte2 = memory_array[gp + 1] << 8;
     byte3 = memory_array[gp + 2] << 16;
