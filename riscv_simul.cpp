@@ -24,6 +24,20 @@ int file;
 uint8_t memory_array [65536] = {};		// Memory in bytes
 uint32_t r[32] = {}; 					// r0 is zero
 
+uint32_t mem_acc(int mem_p,int b) {
+	uint32_t mem_loc;
+	if(b==4) {
+		mem_loc = memory_array[mem_p] | memory_array[mem_p + 1] << 8 | memory_array[mem_p + 2] << 16 | memory_array [mem_p + 3] << 24;
+	}
+	else if (b==2) {
+		mem_loc = memory_array[mem_p] | memory_array[mem_p + 1] << 8;
+	}
+	else {
+		mem_loc = memory_array[mem_p];
+	}
+	return mem_loc;
+}
+
 // Prints the usage of the program.
 void usage()
 {
@@ -80,6 +94,8 @@ int main(int argc, char* argv[]) {
 	uint32_t opcode, funct3, funct7, rd, rs1, rs2;
 	uint32_t II,SI,BI,UI,JI; 						// Immediate fields 
 	bool MSBimmediate;
+	uint32_t memory_loc;
+	int bytes;
 	
 	switch (argc) {
 		case 1: infile.open(I_FILENAME);			// No Arguments provided. Read program.mem, pc 0, sa 65535, verbose disabled
@@ -211,6 +227,11 @@ int main(int argc, char* argv[]) {
 					switch(funct3) {
 						case 0x00:	cout<<"LB detected"<<endl;
 									// Operation here
+									// memory_loc = mem_acc(0,1);  			// Mention loc and bytes 
+									//imm + r[rs1] -- get that value
+									
+									// store in rd
+
 						break;
 						
 						case 0x01: cout<<"LH detected"<<endl;
@@ -273,6 +294,9 @@ int main(int argc, char* argv[]) {
 					switch(funct3) {
 						case 0x00:	cout<<"SB detected"<<endl;
 									// Operation here
+									// imm + rs2
+									// call funct - mem_acc(imm + rs2,2)
+									// store value of rs1 to memory location.
 						break;
 						
 						case 0x01: cout<<"SH detected"<<endl;
@@ -346,10 +370,8 @@ int main(int argc, char* argv[]) {
 				default: cout<<"Opcode doesn't exist"<<endl; 
 				break;
 			}
-			pc= pc+4;
-			r[1] = 0xFFFFFFFF; 	// some dummy values to check
-			r[2] = 0xFFFF;		// some dummy values to check
-			print_regs();
+			pc=pc+4;
+			// print_regs();
 		}
 	}
 	infile.close();
