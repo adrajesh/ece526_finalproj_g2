@@ -193,7 +193,7 @@ int main(int argc, char* argv[]) {
 								break;
 								
 								case 0x03:	cout<<"SLTU detected"<<endl;
-									if (r[rs2] != 0)
+									if  (uint32_t (r[rs1]) < (uint32_t (r[rs2])
 									{
 										r[rd] = 1;
 									}
@@ -372,7 +372,7 @@ int main(int argc, char* argv[]) {
 						break;
 						
 						case 0x06: cout<<"BLTU detected"<<endl;
-							if ((unsigned int r[rs1]) < (unsigned int r[rs2]))
+							if (uint32_t (r[rs1]) < (uint32_t (r[rs2])
 							{
 								pc = pc + BI;
 							}
@@ -383,7 +383,7 @@ int main(int argc, char* argv[]) {
 						break;
 						
 						case 0x07: cout<<"BGEU detected"<<endl;
-							if (unsigned int r[rs1] >= unsigned int r[rs2])
+							if (uint32_t (r[rs1]) >= (uint32_t (r[rs2])
 							{
 								pc = pc + BI;
 							}
