@@ -24,6 +24,20 @@ int file;
 uint8_t memory_array [65536] = {};		// Memory in bytes
 uint32_t r[32] = {}; 					// r0 is zero
 
+uint32_t mem_acc(int mem_p,int b) {
+	uint32_t mem_loc;
+	if(b==4) {
+		mem_loc = memory_array[mem_p] | memory_array[mem_p + 1] << 8 | memory_array[mem_p + 2] << 16 | memory_array [mem_p + 3] << 24;
+	}
+	else if (b==2) {
+		mem_loc = memory_array[mem_p] | memory_array[mem_p + 1] << 8;
+	}
+	else {
+		mem_loc = memory_array[mem_p];
+	}
+	return mem_loc;
+}
+
 // Prints the usage of the program.
 void usage()
 {
@@ -80,7 +94,8 @@ int main(int argc, char* argv[]) {
 	uint32_t opcode, funct3, funct7, rd, rs1, rs2;
 	uint32_t II,SI,BI,UI,JI; 						// Immediate fields 
 	bool MSBimmediate;
-	int32_t RS1,RS2;
+	uint32_t memory_loc;
+	int bytes;
 	
 	switch (argc) {
 		case 1: infile.open(I_FILENAME);			// No Arguments provided. Read program.mem, pc 0, sa 65535, verbose disabled
@@ -159,50 +174,49 @@ int main(int argc, char* argv[]) {
 						case 0x00:
 							switch(funct3) {
 								case 0x00: 	cout<<"ADD detected"<<endl;
-											// Operation here
-											r[rd]=r[rs1]+r[rs2];
+									r[rd] = r[rs1] + r[rs2];	
+									pc = pc + 4;
 								break;
 								
-								
 								case 0x01: 	cout<<"SLL detected"<<endl;
-											// Operation here
-											r[rd]=r[rs1]<<r[rs2];
+									r[rd] = r[rs1] << r[rs2];
+									pc = pc + 4;
 								break;
 								
 								case 0x02:	cout<<"SLT detected"<<endl;
-											// Operation here
-											if(r[rs1]<r[rs2])
-												r[rd]=1;
-											else
-												r[rd]=0;
+									if (r[rs1] < r[rs2])
+										r[rd] = 1;
+									else
+										r[rd] = 0;
+									pc = pc + 4;
 								break;
 								
 								case 0x03:	cout<<"SLTU detected"<<endl;
-											// Operation here
-											if(uint32_t(r[rs1]) < uint32_t(r[rs2]))
-												r[rd]=1;
-											else
-												r[rd]=0;
+									if  ((uint32_t (r[rs1])) < (uint32_t (r[rs2])))
+										r[rd] = 1;
+									else
+										r[rd] = 0;
+									pc = pc + 4;
 								break;
 								
 								case 0x04:	cout<<"XOR detected"<<endl;
-											// Operation here
-											r[rd]=r[rs1]^r[rs2];
+									r[rd] = (r[rs1] ^ r[rs2]);		
+									pc = pc + 4;
 								break;
 								
 								case 0x05:	cout<<"SRL detected"<<endl;
-											// Operation here
-											r[rd]=uint32_t(r[rs1])>>r[rs2]
+									r[rd] = r[rs1] >> r[rs2];		
+									pc = pc + 4;
 								break;
 								
 								case 0x06:	cout<<"OR detected"<<endl;
-											// Operation here
-											r[rd]=r[rs1]|r[rs2];
+									r[rd] = (r[rs1] | r[rs2]);		
+									pc = pc + 4;
 								break;
 								
 								case 0x07:	cout<<"AND detected"<<endl;
-											// Operation here
-											r[rd]=r[rs1]&r[rs2];
+									r[rd] = (r[rs1] & r[rs2]);		
+									pc = pc + 4;
 								break;
 							}
 						break;
@@ -210,13 +224,13 @@ int main(int argc, char* argv[]) {
 						case 0x20:
 							switch(funct3) {
 								case 0x00:	cout<<"SUB detected"<<endl;
-											// Operation here
-											r[rd]=r[rs1]-r[rs2];
+									r[rd] = r[rs1] - r[rs2];		
+									pc = pc + 4;
 								break;
 								
 								case 0x05: cout<<"SRA detected"<<endl;
 											// Operation here
-											r[rd]=r[rs1]>>r[rs2];
+											pc = pc + 4;
 								break;
 							}
 						break;
@@ -228,23 +242,33 @@ int main(int argc, char* argv[]) {
 					II=immediate(opcode,instr);
 					switch(funct3) {
 						case 0x00:	cout<<"LB detected"<<endl;
+									pc = pc + 4;	
 									// Operation here
+									// memory_loc = mem_acc(0,1);  			// Mention loc and bytes 
+									//imm + r[rs1] -- get that value
+									
+									// store in rd
+
 						break;
 						
 						case 0x01: cout<<"LH detected"<<endl;
 									// Operation here
+									pc = pc + 4;
 						break;
 						
 						case 0x02: cout<<"LW detected"<<endl;
 									// Operation here
+									pc = pc + 4;
 						break;
 						
 						case 0x04: cout<<"LBU detected"<<endl;
 									// Operation here
+									pc = pc + 4;
 						break;
 						
 						case 0x05: cout<<"LHU detected"<<endl;
 									// Operation here
+									pc = pc + 4;
 						break;
 					}
 				break;
@@ -254,41 +278,40 @@ int main(int argc, char* argv[]) {
 					II=immediate(opcode,instr);
 					switch(funct3) {
 						case 0x00:	cout<<"ADDI detected"<<endl;
-									// Operation here
-									r[rd]=r[rs1]+ II;
+									 r[rd]=r[rs1]+ II;
+									 pc = pc + 4;
 						break;
 						
 						case 0x02: cout<<"SLTI detected"<<endl;
-									// Operation here
 									if(r[rs1]>II)
 										r[rd]=1;
 									else 
 										r[rd]=0;
+									pc = pc + 4;
 						break;
 						
 						case 0x03: cout<<"SLTIU detected"<<endl;
-									// Operation here
 									II = (instr & (0xFFF00000))>>20;
 									if(r[rs1]>II)
 										r[rd]=1;
 									else 
 										r[rd]=0;
+									pc = pc + 4;
 						break;
 						
 						case 0x04: cout<<"XORI detected"<<endl;
-									// Operation here
 									r[rd]=r[rs1]^II;
-									
+									pc = pc + 4;
 						break;
 						
 						case 0x06: cout<<"ORI detected"<<endl;
-									// Operation here
 									r[rd]=r[rs1]|II;
+									pc = pc + 4;
 						break;
 						
 						case 0x07: cout<<"ANDI detected"<<endl;
-									// Operation here
 									r[rd]=r[rs1]&II;
+									pc = pc + 4;
 						break;
 					}
 				break;
@@ -305,14 +328,20 @@ int main(int argc, char* argv[]) {
 					switch(funct3) {
 						case 0x00:	cout<<"SB detected"<<endl;
 									// Operation here
+									pc = pc + 4;
+									// imm + rs2
+									// call funct - mem_acc(imm + rs2,2)
+									// store value of rs1 to memory location.
 						break;
 						
 						case 0x01: cout<<"SH detected"<<endl;
 									// Operation here
+									pc = pc + 4;
 						break;
 						
 						case 0x02: cout<<"SW detected"<<endl;
 									// Operation here
+									pc = pc + 4;
 						break;
 					}
 				break;
@@ -322,27 +351,45 @@ int main(int argc, char* argv[]) {
 					BI=immediate(opcode,instr);
 					switch(funct3) {
 						case 0x00:	cout<<"BEQ detected"<<endl;
-									// Operation here
+							if (r[rs1] == r[rs2])
+								pc = pc + BI;
+							else
+								pc = pc + 4;
 						break;
 						
 						case 0x01: cout<<"BNE detected"<<endl;
-									// Operation here
+							if (r[rs1] != r[rs2])
+								pc = pc + BI;
+							else
+								pc = pc + 4; 
 						break;
 						
 						case 0x04: cout<<"BLT detected"<<endl;
-									// Operation here
+							if (r[rs1] < r[rs2])
+								pc = pc + BI;
+							else
+								pc = pc + 4;
 						break;
 						
 						case 0x05: cout<<"BGE detected"<<endl;
-									// Operation here
+							if (r[rs1] >= r[rs2])
+								pc = pc + BI;
+							else
+								pc = pc + 4;
 						break;
 						
 						case 0x06: cout<<"BLTU detected"<<endl;
-									// Operation here
+							if ((uint32_t (r[rs1])) < (uint32_t (r[rs2])))
+								pc = pc + BI;
+							else
+								pc = pc + 4;
 						break;
 						
 						case 0x07: cout<<"BGEU detected"<<endl;
-									// Operation here
+							if ((uint32_t (r[rs1])) >= (uint32_t (r[rs2])))
+								pc = pc + BI;
+							else
+								pc = pc + 4;
 						break;
 					}
 				break;
@@ -352,6 +399,7 @@ int main(int argc, char* argv[]) {
 					UI=immediate(opcode,instr);
 					cout<<"LUI detected"<<endl;
 					r[rd]=UI;
+					pc = pc + 4;
 				break;
 				
 				case 0x17: cout<<"U-type Instruction"<<endl;
@@ -359,12 +407,14 @@ int main(int argc, char* argv[]) {
 					UI=immediate(opcode,instr);
 					cout<<"AUIPC detected"<<endl;
 					r[rd]=pc+UI;
+					pc = pc + 4;
 				break;
 				
 				case 0x6F: cout<<"J-type Instruction"<<endl;
 					// JAL
 					JI=immediate(opcode,instr);
 					cout<<"JAL detected"<<endl;
+					
 				break;
 				
 				// !!! Need to check on SLLI, SRLI and SRAI - opcode is 0x13, but not I type? !!!
@@ -380,10 +430,8 @@ int main(int argc, char* argv[]) {
 				default: cout<<"Opcode doesn't exist"<<endl; 
 				break;
 			}
-			pc= pc+4;
-			//r[1] = 0xFFFFFFFF; 	// some dummy values to check
-			//r[2] = 0xFFFF;		// some dummy values to check
-			print_regs();
+			//pc=pc+4;
+			// print_regs();
 		}
 	}
 	infile.close();
