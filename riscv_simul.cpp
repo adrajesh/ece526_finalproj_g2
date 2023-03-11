@@ -174,35 +174,49 @@ int main(int argc, char* argv[]) {
 						case 0x00:
 							switch(funct3) {
 								case 0x00: 	cout<<"ADD detected"<<endl;
-											// Operation here
+									r[rd] = r[rs1] + r[rs2];		// Operation here
 								break;
 								
 								case 0x01: 	cout<<"SLL detected"<<endl;
-											// Operation here
+									r[rd] = r[rs1] << r[rs2];		// Operation here
 								break;
 								
 								case 0x02:	cout<<"SLT detected"<<endl;
-											// Operation here
+									if (r[rs1] < r[rs2])
+									{
+										r[rd] = 1;
+									}
+									else
+									{
+										r[rd] = 0;
+									}				// Operation here
 								break;
 								
 								case 0x03:	cout<<"SLTU detected"<<endl;
-											// Operation here
+									if (r[rs2] != 0)
+									{
+										r[rd] = 1;
+									}
+									else
+									{
+										r[rd] = 0;
+									}					// Operation here
 								break;
 								
 								case 0x04:	cout<<"XOR detected"<<endl;
-											// Operation here
+									r[rd] = (r[rs1] ^ r[rs2]);		// Operation here
 								break;
 								
 								case 0x05:	cout<<"SRL detected"<<endl;
-											// Operation here
+									r[rd] = r[rs1] >> r[rs2];		// Operation here
 								break;
 								
 								case 0x06:	cout<<"OR detected"<<endl;
-											// Operation here
+									r[rd] = (r[rs1] | r[rs2]);		// Operation here
 								break;
 								
 								case 0x07:	cout<<"AND detected"<<endl;
-											// Operation here
+									r[rd] = (r[rs1] & r[rs2]);		// Operation here
 								break;
 							}
 						break;
@@ -210,7 +224,7 @@ int main(int argc, char* argv[]) {
 						case 0x20:
 							switch(funct3) {
 								case 0x00:	cout<<"SUB detected"<<endl;
-											// Operation here
+									r[rd] = r[rs1] - r[rs2];		// Operation here
 								break;
 								
 								case 0x05: cout<<"SRA detected"<<endl;
@@ -314,27 +328,69 @@ int main(int argc, char* argv[]) {
 					BI=immediate(opcode,instr);
 					switch(funct3) {
 						case 0x00:	cout<<"BEQ detected"<<endl;
-									// Operation here
+							if (r[rs1] == r[rs2])
+							{
+								pc = pc + BI;
+							}
+							else
+							{
+								pc = pc + 4; // ## pdf has + or - 4, Which to chose???
+							}		// Operation here
 						break;
 						
 						case 0x01: cout<<"BNE detected"<<endl;
-									// Operation here
+							if (r[rs1] != r[rs2])
+							{
+								pc = pc + BI;
+							}
+							else
+							{
+								pc = pc + 4; // ## pdf has + or - 4, Which to chose???
+							}		// Operation here
 						break;
 						
 						case 0x04: cout<<"BLT detected"<<endl;
-									// Operation here
+							if (r[rs1] < r[rs2])
+							{
+								pc = pc + BI;
+							}
+							else
+							{
+								pc = pc + 4;
+							}			// Operation here
 						break;
 						
 						case 0x05: cout<<"BGE detected"<<endl;
-									// Operation here
+							if (r[rs1] >= r[rs2])
+							{
+								pc = pc + BI;
+							}
+							else
+							{
+								pc = pc + 4;
+							}		// Operation here
 						break;
 						
 						case 0x06: cout<<"BLTU detected"<<endl;
-									// Operation here
+							if ((unsigned int r[rs1]) < (unsigned int r[rs2]))
+							{
+								pc = pc + BI;
+							}
+							else
+							{
+								pc = pc + 4;
+							}		// Operation here
 						break;
 						
 						case 0x07: cout<<"BGEU detected"<<endl;
-									// Operation here
+							if (unsigned int r[rs1] >= unsigned int r[rs2])
+							{
+								pc = pc + BI;
+							}
+							else
+							{
+								pc = pc + 4;
+							}		// Operation here
 						break;
 					}
 				break;
