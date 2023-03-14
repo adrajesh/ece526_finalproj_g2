@@ -67,7 +67,7 @@ void parse_line(std::string access,unsigned int arr[]) {
 	unsigned int instruction;
 	unsigned int trace_pc;
 	// Parse from the string we read from the file
-	sscanf(access.c_str(), "%lx: %lx", &trace_pc, &instruction);
+	sscanf(access.c_str(), "%x: %x", &trace_pc, &instruction);
 	arr[0]=trace_pc;
 	arr[1]=instruction;
 }
@@ -115,7 +115,7 @@ int main(int argc, char* argv[]) {
 				break;
 		case 3: infile.open(argv[1]);				// 2 Arguments provided. Read xyz.mem, pc x, sa 65535, verbose disabled
 				check_file(infile.is_open());
-				sscanf(argv[2],"%lx",&pc);
+				sscanf(argv[2],"%x",&pc);
 				//pc = (int) atoi(argv[2]);			// To change from char* to int
 				sa = STACK_ADDR;
 				DebugMode = 0;
@@ -123,14 +123,14 @@ int main(int argc, char* argv[]) {
 		case 4: infile.open(argv[1]);				// 3 Arguments provided. Read xyz.mem, pc x, sa y, verbose disabled
 				check_file(infile.is_open());
 				//pc = (int) atoi(argv[2]);
-				sscanf(argv[2],"%lx",&pc);
+				sscanf(argv[2],"%x",&pc);
 				sa = (int) atoi(argv[3]);
 				DebugMode = 0;
 				break;
 		case 5: infile.open(argv[1]);				// 4 Arguments provided. Read xyz.mem, pc x, sa y, verbose enabled
 				check_file(infile.is_open());
 				//pc = (int) atoi(argv[2]);
-				sscanf(argv[2],"%lx",&pc);
+				sscanf(argv[2],"%x",&pc);
 				sa = (int) atoi(argv[3]);
 				if(strcmp(argv[4],"debug")==0) {
 					cout<<"Debug Mode enabled"<<endl;	
