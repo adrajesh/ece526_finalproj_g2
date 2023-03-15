@@ -22,7 +22,7 @@ int sp;					// stack address
 int file;
 // uint32_t registers[32];
 uint8_t memory_array[65536] = {};		// Memory in bytes
-uint32_t r[32] = {}; 					// r0 is zero
+uint32_t x[32] = {}; 					// r0 is zero
 
 uint32_t mem_acc(int mem_p,int b) {
 	uint32_t mem_loc;
@@ -76,7 +76,7 @@ void print_regs() {
 	// Print all contents of 32 register
 	int count = 0;
 	for(int i=0;i<32;i++) {
-		cout<<"x["<<std::dec<<i<<"]"<<" - "<<std::hex<<std::setw(8)<<setfill('0')<<r[i]<<" \t " ;
+		cout<<"x["<<std::dec<<i<<"]"<<" - "<<std::hex<<std::setw(8)<<setfill('0')<<x[i]<<" \t " ;
 		count++;
 		if (count%8==0) {
 			cout<<endl;
@@ -147,7 +147,7 @@ int main(int argc, char* argv[]) {
 	cout<<"Program Counter - "<<std::hex<<pc<<endl;
 	cout<<"Stack Address - "<<sp<<endl;
 	cout<<"Debug mode - "<<DebugMode<<endl;
-	r[2] = sp;
+	x[2] = sp;
 	// Main Program begins here!
 	
 	while(std::getline(infile, line)){
@@ -189,41 +189,41 @@ int main(int argc, char* argv[]) {
 					case 0x00:
 						switch(funct3) {
 							case 0x00: 	cout<<"ADD detected"<<endl;
-								r[rd] = r[rs1] + r[rs2];	
+								x[rd] = x[rs1] + x[rs2];	
 							break;
 							
 							case 0x01: 	cout<<"SLL detected"<<endl;
-								r[rd] = r[rs1] << r[rs2];
+								x[rd] = x[rs1] << x[rs2];
 							break;
 							
 							case 0x02:	cout<<"SLT detected"<<endl;
-								if (r[rs1] < r[rs2])
-									r[rd] = 1;
+								if (x[rs1] < x[rs2])
+									x[rd] = 1;
 								else
-									r[rd] = 0;
+									x[rd] = 0;
 								break;
 								
 							case 0x03:	cout<<"SLTU detected"<<endl;
-								if  ((uint32_t (r[rs1])) < (uint32_t (r[rs2])))
-									r[rd] = 1;
+								if  ((uint32_t (x[rs1])) < (uint32_t (x[rs2])))
+									x[rd] = 1;
 								else
-									r[rd] = 0;
+									x[rd] = 0;
 								break;
 								
 							case 0x04:	cout<<"XOR detected"<<endl;
-								r[rd] = (r[rs1] ^ r[rs2]);		
+								x[rd] = (x[rs1] ^ x[rs2]);		
 							break;
 								
 							case 0x05:	cout<<"SRL detected"<<endl;
-								r[rd] = r[rs1] >> r[rs2];		
+								x[rd] = x[rs1] >> x[rs2];		
 							break;
 								
 							case 0x06:	cout<<"OR detected"<<endl;
-								r[rd] = (r[rs1] | r[rs2]);		
+								x[rd] = (x[rs1] | x[rs2]);		
 							break;
 								
 							case 0x07:	cout<<"AND detected"<<endl;
-								r[rd] = (r[rs1] & r[rs2]);		
+								x[rd] = (x[rs1] & x[rs2]);		
 							break;
 							}
 						break;
@@ -231,7 +231,7 @@ int main(int argc, char* argv[]) {
 					case 0x20:
 						switch(funct3) {
 							case 0x00:	cout<<"SUB detected"<<endl;
-								r[rd] = r[rs1] - r[rs2];		
+								x[rd] = x[rs1] - x[rs2];		
 							break;
 							
 							case 0x05: cout<<"SRA detected"<<endl;
@@ -277,34 +277,34 @@ int main(int argc, char* argv[]) {
 				II=immediate(opcode,curr_instr);
 				switch(funct3) {
 					case 0x00:	cout<<"ADDI detected"<<endl;
-								 r[rd]=r[rs1]+ II;
+								 x[rd]=x[rs1]+ II;
 					break;
 					
 					case 0x02: cout<<"SLTI detected"<<endl;
-								if(r[rs1]>II)
-									r[rd]=1;
+								if(x[rs1]>II)
+									x[rd]=1;
 								else 
-									r[rd]=0;
+									x[rd]=0;
 					break;
 					
 					case 0x03: cout<<"SLTIU detected"<<endl;
 								II = (curr_instr & (0xFFF00000))>>20;
-								if(r[rs1]>II)
-									r[rd]=1;
+								if(x[rs1]>II)
+									x[rd]=1;
 								else 
-									r[rd]=0;
+									x[rd]=0;
 					break;
 						
 					case 0x04: cout<<"XORI detected"<<endl;
-								r[rd]=r[rs1]^II;
+								x[rd]=x[rs1]^II;
 					break;
 						
 					case 0x06: cout<<"ORI detected"<<endl;
-								r[rd]=r[rs1]|II;
+								x[rd]=x[rs1]|II;
 					break;
 						
 					case 0x07: cout<<"ANDI detected"<<endl;
-								r[rd]=r[rs1]&II;
+								x[rd]=x[rs1]&II;
 					break;
 				}
 			break;
@@ -341,42 +341,42 @@ int main(int argc, char* argv[]) {
 				BI=immediate(opcode,curr_instr);
 				switch(funct3) {
 					case 0x00:	cout<<"BEQ detected"<<endl;
-						if (r[rs1] == r[rs2])
+						if (x[rs1] == x[rs2])
 							pc = pc + BI;
 //						else
 //							pc = pc + 4;
 					break;
 					
 					case 0x01: cout<<"BNE detected"<<endl;
-						if (r[rs1] != r[rs2])
+						if (x[rs1] != x[rs2])
 							pc = pc + BI;
 //						else
 //							pc = pc + 4; 
 					break;
 					
 					case 0x04: cout<<"BLT detected"<<endl;
-						if (r[rs1] < r[rs2])
+						if (x[rs1] < x[rs2])
 							pc = pc + BI;
 //						else
 //							pc = pc + 4;
 					break;
 					
 					case 0x05: cout<<"BGE detected"<<endl;
-						if (r[rs1] >= r[rs2])
+						if (x[rs1] >= x[rs2])
 							pc = pc + BI;
 //						else
 //							pc = pc + 4;
 					break;
 					
 					case 0x06: cout<<"BLTU detected"<<endl;
-						if ((uint32_t (r[rs1])) < (uint32_t (r[rs2])))
+						if ((uint32_t (x[rs1])) < (uint32_t (x[rs2])))
 							pc = pc + BI;
 //						else
 //							pc = pc + 4;
 					break;
 					
 					case 0x07: cout<<"BGEU detected"<<endl;
-						if ((uint32_t (r[rs1])) >= (uint32_t (r[rs2])))
+						if ((uint32_t (x[rs1])) >= (uint32_t (x[rs2])))
 							pc = pc + BI;
 //						else
 //							pc = pc + 4;
@@ -388,14 +388,14 @@ int main(int argc, char* argv[]) {
 				// LUI
 				UI=immediate(opcode,curr_instr);
 				cout<<"LUI detected"<<endl;
-				r[rd]=UI;
+				x[rd]=UI;
 			break;
 			
 			case 0x17: cout<<"U-type Instruction"<<endl;
 				// AUIPC
 				UI=immediate(opcode,curr_instr);
 				cout<<"AUIPC detected"<<endl;
-				r[rd]=pc+UI;
+				x[rd]=pc+UI;
 			break;
 				
 			case 0x6F: cout<<"J-type Instruction"<<endl;
