@@ -18,7 +18,7 @@ using namespace std;
 // Global vars
 int DebugMode;
 int pc; 				// program counter
-int sa;					// stack address
+int sp;					// stack address
 int file;
 // uint32_t registers[32];
 uint8_t memory_array[65536] = {};		// Memory in bytes
@@ -93,7 +93,7 @@ int main(int argc, char* argv[]) {
 	uint32_t instr,curr_instr;
 	uint32_t file_pc;
 	uint32_t opcode, funct3, funct7, rd, rs1, rs2;
-	uint32_t II,SI,BI,UI,JI; 						// Immediate fields 
+	int32_t II,SI,BI,UI,JI; 						// Immediate fields 
 	bool MSBimmediate;
 	uint32_t memory_loc;
 	int bytes;
@@ -104,34 +104,34 @@ int main(int argc, char* argv[]) {
 		case 1: infile.open(I_FILENAME);			// No Arguments provided. Read program.mem, pc 0, sa 65535, verbose disabled
 				check_file(infile.is_open());
 				pc = PC_LOC;
-				sa = STACK_ADDR;
+				sp = STACK_ADDR;
 				DebugMode = 0;
 				break;
 		case 2: infile.open(argv[1]);				// 1 Arguments provided. Read xyz.mem, pc 0, sa 65535, verbose disabled
 				check_file(infile.is_open());
 				pc = PC_LOC;
-				sa = STACK_ADDR;
+				sp = STACK_ADDR;
 				DebugMode = 0;
 				break;
 		case 3: infile.open(argv[1]);				// 2 Arguments provided. Read xyz.mem, pc x, sa 65535, verbose disabled
 				check_file(infile.is_open());
 				sscanf(argv[2],"%x",&pc);
 				//pc = (int) atoi(argv[2]);			// To change from char* to int
-				sa = STACK_ADDR;
+				sp = STACK_ADDR;
 				DebugMode = 0;
 				break;
 		case 4: infile.open(argv[1]);				// 3 Arguments provided. Read xyz.mem, pc x, sa y, verbose disabled
 				check_file(infile.is_open());
 				//pc = (int) atoi(argv[2]);
 				sscanf(argv[2],"%x",&pc);
-				sa = (int) atoi(argv[3]);
+				sp = (int) atoi(argv[3]);
 				DebugMode = 0;
 				break;
 		case 5: infile.open(argv[1]);				// 4 Arguments provided. Read xyz.mem, pc x, sa y, verbose enabled
 				check_file(infile.is_open());
 				//pc = (int) atoi(argv[2]);
 				sscanf(argv[2],"%x",&pc);
-				sa = (int) atoi(argv[3]);
+				sp = (int) atoi(argv[3]);
 				if(strcmp(argv[4],"debug")==0) {
 					cout<<"Debug Mode enabled"<<endl;	
 					DebugMode = 1;
@@ -145,9 +145,9 @@ int main(int argc, char* argv[]) {
 		}
 	cout<<endl<<"WELCOME TO RISC-V SIMULATOR"<<endl;
 	cout<<"Program Counter - "<<std::hex<<pc<<endl;
-	cout<<"Stack Address - "<<sa<<endl;
+	cout<<"Stack Address - "<<sp<<endl;
 	cout<<"Debug mode - "<<DebugMode<<endl;
-	
+	r[2] = sp;
 	// Main Program begins here!
 	
 	while(std::getline(infile, line)){
