@@ -38,23 +38,6 @@ uint32_t mem_acc(int mem_p, int b) {
 	return mem_cont;
 }
 
-uint32_t mem_wr(int mem_p, int b, uint32_t mem_cont) {
-	if (b == 4) {
-		memory_array[mem_p] = mem_cont & 0xFF;
-		memory_array[mem_p + 1] = (mem_cont >> 8) & 0xFF;
-		memory_array[mem_p + 2] = (mem_cont >> 16) & 0xFF;
-		memory_array[mem_p + 3] = (mem_cont >> 24) & 0xFF;
-	}
-	else if (b == 2) {
-		memory_array[mem_p] = mem_cont & 0xFF;
-		memory_array[mem_p + 1] = (mem_cont >> 8) & 0xFF;
-	}
-	else {
-		memory_array[mem_p] = mem_cont & 0xFF;
-	}
-	return mem_cont;
-}
-
 // Prints the usage of the program.
 void usage()
 {
@@ -341,7 +324,6 @@ int main(int argc, char* argv[]) {
 			switch (funct3) {
 			case 0x00:	cout << "SB detected" << endl;
 				// Operation here
-				mem_wr((SI + x[rs1]),1,x[rs2]);
 				// imm + rs2
 				// call funct - mem_acc(imm + rs2,2)
 				// store value of rs1 to memory location.
@@ -349,12 +331,10 @@ int main(int argc, char* argv[]) {
 
 			case 0x01: cout << "SH detected" << endl;
 				// Operation here
-				mem_wr((SI + x[rs1]),2,x[rs2]);
 				break;
 
 			case 0x02: cout << "SW detected" << endl;
 				// Operation here
-				mem_wr((SI + x[rs1]),4, x[rs2]);
 				break;
 			}
 			break;
