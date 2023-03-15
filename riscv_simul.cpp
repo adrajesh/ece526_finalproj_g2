@@ -333,6 +333,8 @@ int main(int argc, char* argv[]) {
 			// only JALR!
 			II = immediate(opcode, curr_instr);
 			cout << "JALR detected" << endl;
+			//operation here
+			x[rd] = ((II + x[rs1] + 0x4));
 			break;
 
 		case 0x23: cout << "S-type Instruction" << endl;
@@ -425,6 +427,7 @@ int main(int argc, char* argv[]) {
 			// JAL
 			JI = immediate(opcode, curr_instr);
 			cout << "JAL detected" << endl;
+			x[rd] = ((JI + 0x4));
 			break;
 
 			// !!! Need to check on SLLI, SRLI and SRAI - opcode is 0x13, but not I type? !!!
