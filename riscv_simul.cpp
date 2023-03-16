@@ -334,7 +334,8 @@ int main(int argc, char* argv[]) {
 			II = immediate(opcode, curr_instr);
 			cout << "JALR detected" << endl;
 			//operation here
-			x[rd] = ((II + x[rs1] + 0x4));
+			x[rd] = pc + 4;
+			pc = ((pc + II) & 0xFFFFFFFE);
 			break;
 
 		case 0x23: cout << "S-type Instruction" << endl;
@@ -389,8 +390,8 @@ int main(int argc, char* argv[]) {
 			case 0x05: cout << "BGE detected" << endl;
 				if (x[rs1] >= x[rs2])
 					pc = pc + BI;
-				//						else
-				//							pc = pc + 4;
+				//			else
+				//			pc = pc + 4;
 				break;
 
 			case 0x06: cout << "BLTU detected" << endl;
@@ -427,7 +428,8 @@ int main(int argc, char* argv[]) {
 			// JAL
 			JI = immediate(opcode, curr_instr);
 			cout << "JAL detected" << endl;
-			x[rd] = ((JI + 0x4));
+			x[rd] = pc + 4;
+			pc = pc + JI; 
 			break;
 
 			// !!! Need to check on SLLI, SRLI and SRAI - opcode is 0x13, but not I type? !!!
