@@ -186,7 +186,14 @@ int main(int argc, char* argv[]) {
 	{
 		curr_instr = memory_array[pc] | (memory_array[pc + 1] << 8) | (memory_array[pc + 2] << 16) | (memory_array[pc + 3] << 24);
 		cout << endl << "pc: " << std::hex << std::uppercase << pc << " instr: " << std::hex << curr_instr << endl;
-
+		if (curr_instr == 0x00000000) {								// Check for all 0 instr
+			cout<<"Ending simulation !!! (all 0 instr)";
+			break;
+		}
+		if ((curr_instr == 0x00008067) && (x[1] == 0)) {			// Check for jr ra where ra is 0
+			cout<<"Ending simulation !!! (jr ra 0)";
+			break;
+		}
 		// Store everything regardless of instr type 
 		opcode = curr_instr & (0x7F);								// bits [6:0]
 		funct3 = (curr_instr & (0x7000)) >> 12;						// bits [14:12]
@@ -205,41 +212,41 @@ int main(int argc, char* argv[]) {
 			switch (funct7) {
 			case 0x00:
 				switch (funct3) {
-				case 0x00: 	cout << "ADD detected" << endl;
+				case 0x00: 	cout << "ADD detected" << endl;			// ADD detected (R-type)
 					x[rd] = x[rs1] + x[rs2];
 					break;
 
-				case 0x01: 	cout << "SLL detected" << endl;
+				case 0x01: 	cout << "SLL detected" << endl;			// SLL detected (R-type)
 					x[rd] = x[rs1] << x[rs2];
 					break;
 
-				case 0x02:	cout << "SLT detected" << endl;
+				case 0x02:	cout << "SLT detected" << endl;			// SLT detected (R-type)
 					if (x[rs1] < x[rs2])
 						x[rd] = 1;
 					else
 						x[rd] = 0;
 					break;
 
-				case 0x03:	cout << "SLTU detected" << endl;
+				case 0x03:	cout << "SLTU detected" << endl;		// SLTU detected (R-type)
 					if ((uint32_t(x[rs1])) < (uint32_t(x[rs2])))
 						x[rd] = 1;
 					else
 						x[rd] = 0;
 					break;
 
-				case 0x04:	cout << "XOR detected" << endl;
+				case 0x04:	cout << "XOR detected" << endl;			// XOR detected (R-type)
 					x[rd] = (x[rs1] ^ x[rs2]);
 					break;
 
-				case 0x05:	cout << "SRL detected" << endl;
+				case 0x05:	cout << "SRL detected" << endl;			// SRL detected (R-type)
 					x[rd] = x[rs1] >> x[rs2];
 					break;
 
-				case 0x06:	cout << "OR detected" << endl;
+				case 0x06:	cout << "OR detected" << endl;			// OR detected (R-type)
 					x[rd] = (x[rs1] | x[rs2]);
 					break;
 
-				case 0x07:	cout << "AND detected" << endl;
+				case 0x07:	cout << "AND detected" << endl;			// AND detected (R-type)
 					x[rd] = (x[rs1] & x[rs2]);
 					break;
 				}
@@ -247,11 +254,11 @@ int main(int argc, char* argv[]) {
 
 			case 0x20:
 				switch (funct3) {
-				case 0x00:	cout << "SUB detected" << endl;
+				case 0x00:	cout << "SUB detected" << endl;			// SUB detected (R-type)
 					x[rd] = x[rs1] - x[rs2];
 					break;
 
-				case 0x05: cout << "SRA detected" << endl;
+				case 0x05: cout << "SRA detected" << endl;			// SRA detected (R-type)
 					// Operation here
 					break;
 				}
@@ -263,30 +270,26 @@ int main(int argc, char* argv[]) {
 			// LB, LH, LW, LBU, LHU
 			II = immediate(opcode, curr_instr);
 			switch (funct3) {
-			case 0x00:	cout << "LB detected" << endl;
+			case 0x00:	cout << "LB detected" << endl;				// LB detected (I-type)
 				// Operation here
-				x[rd] = mem_acc((II + x[rs1]), 1);
-				// memory_loc = mem_acc(0,1);  			// Mention loc and bytes 
-				//imm + r[rs1] -- get that value
-
-				// store in rd
+				x[rd] = mem_acc((II + x[rs1]), 1);					
 				break;
 
-			case 0x01: cout << "LH detected" << endl;
+			case 0x01: cout << "LH detected" << endl;				// LH detected (I-type)
 				// Operation here
 				x[rd] = mem_acc((II + x[rs1]), 2);
 				break;
 
-			case 0x02: cout << "LW detected" << endl;
+			case 0x02: cout << "LW detected" << endl;				// LW detected (I-type)
 				// Operation here
 				x[rd] = mem_acc((II + x[rs1]), 4);
 				break;
 
-			case 0x04: cout << "LBU detected" << endl;
+			case 0x04: cout << "LBU detected" << endl;				// LBU detected (I-type)
 				// Operation here
 				break;
 
-			case 0x05: cout << "LHU detected" << endl;
+			case 0x05: cout << "LHU detected" << endl;				// LHU detected (I-type)
 				// Operation here
 				break;
 			}
@@ -296,18 +299,18 @@ int main(int argc, char* argv[]) {
 			// ADDI, SLTI, SLTIU, XORI, ORI, ANDI 
 			II = immediate(opcode, curr_instr);
 			switch (funct3) {
-			case 0x00:	cout << "ADDI detected" << endl;
+			case 0x00:	cout << "ADDI detected" << endl;			// ADDI detected (I-type)
 				x[rd] = x[rs1] + II;
 				break;
 
-			case 0x02: cout << "SLTI detected" << endl;
+			case 0x02: cout << "SLTI detected" << endl;				// SLTI detected (I-type)
 				if (x[rs1] > II)
 					x[rd] = 1;
 				else
 					x[rd] = 0;
 				break;
 
-			case 0x03: cout << "SLTIU detected" << endl;
+			case 0x03: cout << "SLTIU detected" << endl;			// SLTIU detected (I-type)
 				II = (curr_instr & (0xFFF00000)) >> 20;
 				if (x[rs1] > II)
 					x[rd] = 1;
@@ -315,15 +318,15 @@ int main(int argc, char* argv[]) {
 					x[rd] = 0;
 				break;
 
-			case 0x04: cout << "XORI detected" << endl;
+			case 0x04: cout << "XORI detected" << endl;				// XORI detected (I-type)
 				x[rd] = x[rs1] ^ II;
 				break;
 
-			case 0x06: cout << "ORI detected" << endl;
+			case 0x06: cout << "ORI detected" << endl;				// ORI detected (I-type)
 				x[rd] = x[rs1] | II;
 				break;
 
-			case 0x07: cout << "ANDI detected" << endl;
+			case 0x07: cout << "ANDI detected" << endl;				// ANDI detected (I-type)
 				x[rd] = x[rs1] & II;
 				break;
 			}
@@ -332,30 +335,25 @@ int main(int argc, char* argv[]) {
 		case 0x67: cout << "I-type Instruction" << endl;
 			// only JALR!
 			II = immediate(opcode, curr_instr);
-			cout << "JALR detected" << endl;
-			//operation here
+			cout << "JALR detected" << endl;						// JALR detected (I-type)
 			x[rd] = pc + 4;
 			pc = ((pc + II) & 0xFFFFFFFE);
 			break;
 
-		case 0x23: cout << "S-type Instruction" << endl;
+		case 0x23: cout << "S-type Instruction" << endl;			
 			// SB,SH,SW
 			SI = immediate(opcode, curr_instr);
 			switch (funct3) {
-			case 0x00:	cout << "SB detected" << endl;
-				// Operation here
+			case 0x00:	cout << "SB detected" << endl;				// SB detected (S-type)
 				mem_wr((SI + x[rs1]),1,x[rs2]);
-				// imm + rs2
-				// call funct - mem_acc(imm + rs2,2)
-				// store value of rs1 to memory location.
 				break;
 
-			case 0x01: cout << "SH detected" << endl;
+			case 0x01: cout << "SH detected" << endl;				// SH detected (S-type)
 				// Operation here
 				mem_wr((SI + x[rs1]),2,x[rs2]);
 				break;
 
-			case 0x02: cout << "SW detected" << endl;
+			case 0x02: cout << "SW detected" << endl;				// SW detected (S-type)
 				// Operation here
 				mem_wr((SI + x[rs1]),4, x[rs2]);
 				break;
@@ -366,42 +364,42 @@ int main(int argc, char* argv[]) {
 			// BEQ, BNE, BLT, BGE, BLTU, BGEU
 			BI = immediate(opcode, curr_instr);
 			switch (funct3) {
-			case 0x00:	cout << "BEQ detected" << endl;
+			case 0x00:	cout << "BEQ detected" << endl;				// BEQ detected (B-type)
 				if (x[rs1] == x[rs2])
 					pc = pc + BI;
 				//						else
 				//							pc = pc + 4;
 				break;
 
-			case 0x01: cout << "BNE detected" << endl;
+			case 0x01: cout << "BNE detected" << endl;				// BNE detected (B-type)
 				if (x[rs1] != x[rs2])
 					pc = pc + BI;
 				//						else
 				//							pc = pc + 4; 
 				break;
 
-			case 0x04: cout << "BLT detected" << endl;
+			case 0x04: cout << "BLT detected" << endl;				// BLT detected (B-type)
 				if (x[rs1] < x[rs2])
 					pc = pc + BI;
 				//						else
 				//							pc = pc + 4;
 				break;
 
-			case 0x05: cout << "BGE detected" << endl;
+			case 0x05: cout << "BGE detected" << endl;				// BGE detected (B-type)
 				if (x[rs1] >= x[rs2])
 					pc = pc + BI;
 				//			else
 				//			pc = pc + 4;
 				break;
 
-			case 0x06: cout << "BLTU detected" << endl;
+			case 0x06: cout << "BLTU detected" << endl;				// BLTU detected (B-type)
 				if ((uint32_t(x[rs1])) < (uint32_t(x[rs2])))
 					pc = pc + BI;
 				//						else
 				//							pc = pc + 4;
 				break;
 
-			case 0x07: cout << "BGEU detected" << endl;
+			case 0x07: cout << "BGEU detected" << endl;				// BGEU detected (B-type)
 				if ((uint32_t(x[rs1])) >= (uint32_t(x[rs2])))
 					pc = pc + BI;
 				//						else
