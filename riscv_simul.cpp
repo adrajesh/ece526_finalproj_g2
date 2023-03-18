@@ -7,6 +7,7 @@
 #include <string.h>
 #include <cctype>
 #include <cstring>
+#include <csignal>
 #include "immediate_field.cpp"
 
 using namespace std;
@@ -203,7 +204,8 @@ int main(int argc, char* argv[]) {
 		rs1 = (curr_instr & (0xF8000)) >> 15;						// bits [19:15]
 		rs2 = (curr_instr & (0x1F00000)) >> 20;						// bits [24:20]
 		// We have to calculate immediate fields also - refer page 16/17
-
+		
+		x[0] = 0;
 		// Enable this in debug mode
 		cout << std::uppercase << std::hex << "Opcode: " << opcode << " funct3: " << funct3 << " funct7: " << funct7 << endl;
 		cout << std::uppercase << std::hex << "rd: " << rd << " rs1: " << rs1 << " rs2: " << rs2 << endl;
@@ -351,6 +353,22 @@ int main(int argc, char* argv[]) {
 				x[rd] = x[rs1] & II;
 				pc = pc + 4;
 				break;
+				
+			case 0x01: cout << "SLLI detected" << endl;
+				x[rd] = x[rs1] << rs2;
+				pc = pc + 4;
+				break;
+				
+			case 0x05: 
+				switch(funct7){
+				case 0x00: cout << "SRLI detected" << endl;
+					pc = pc + 4;
+					break;
+					
+				case 0x20: cout << "SRAI detected" << endl;
+					pc = pc + 4;
+					break;
+				}
 			}
 			break;
 
@@ -404,6 +422,7 @@ int main(int argc, char* argv[]) {
 				break;
 
 			case 0x04: cout << "BLT detected" << endl;				// BLT detected (B-type)
+				x[14]=2;
 				if (x[rs1] < x[rs2])
 					pc = pc + BI;
 				else
@@ -452,9 +471,9 @@ int main(int argc, char* argv[]) {
 		case 0x6F: cout << "J-type Instruction" << endl;
 			// JAL
 			JI = immediate(opcode, curr_instr);
-			cout << "JAL detected" << endl;
-			pc = pc + JI; 
+			cout << "JAL detected" << endl; 
 			x[rd] = pc + 4;
+			pc = pc + JI;
 			break;
 
 			// !!! Need to check on SLLI, SRLI and SRAI - opcode is 0x13, but not I type? !!!
@@ -470,7 +489,7 @@ int main(int argc, char* argv[]) {
 		default: cout << "Opcode doesn't exist" << endl;
 			break;
 		}
-//		pc = pc + 4;
+		cout<<pc<<endl;
 		print_regs();
 	}
 	// For printing the contents of memory into a file - memory_array.txt
