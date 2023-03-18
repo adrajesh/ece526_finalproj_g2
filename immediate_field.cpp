@@ -46,7 +46,7 @@ int immediate(uint32_t opcode, uint32_t instr){
 				cout<<"S immediate: "<<I<<endl;
 				break;
 				
-		case 0x63: I = ((instr & (0xF80))>>7) | ((instr & (0x7E000000))>>20) | ((instr & (0x80))<<5) | ((instr & (0x80000000))>>19);	// B-immediate
+		case 0x63: I = ((instr & (0xF00))>>7) | ((instr & (0x7E000000))>>20) | ((instr & (0x80))<<4) | ((instr & (0x80000000))>>19);	// B-immediate
 				MSBimmediate= I>>12;                               //check the MSB of 13 bit immediate field
 				if(MSBimmediate){                                   
 					I= (I | 0xFFFFE000);                             //extend 1 from 13th bit to 31th bit
