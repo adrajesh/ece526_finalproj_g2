@@ -284,20 +284,17 @@ int main(int argc, char* argv[]) {
 			II = immediate(opcode, curr_instr);
 			switch (funct3) {
 			case 0x00:	cout << "LB detected" << endl;				// LB detected (I-type)
-				// Operation here
-				int32_t(x[rd]) = mem_acc((II + x[rs1]), 1);
+				x[rd] = int32_t(mem_acc((II + x[rs1]), 1));
 				pc = pc + 4;
 				break;
 
 			case 0x01: cout << "LH detected" << endl;				// LH detected (I-type)
-				// Operation here
-				int32_t(x[rd]) = mem_acc((II + x[rs1]), 2);
+				x[rd] = int32_t(mem_acc((II + x[rs1]), 2));
 				pc = pc + 4;
 				break;
 
 			case 0x02: cout << "LW detected" << endl;				// LW detected (I-type)
-				// Operation here
-				int32_t(x[rd]) = mem_acc((II + x[rs1]), 4);
+				x[rd] = int32_t(mem_acc((II + x[rs1]), 4));
 				pc = pc + 4;
 				break;
 
