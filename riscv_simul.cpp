@@ -221,12 +221,12 @@ int main(int argc, char* argv[]) {
 					break;
 
 				case 0x01: 	cout << "SLL detected" << endl;			// SLL detected (R-type)
-					x[rd] = x[rs1] << x[rs2];
+					x[rd] = (uint32_t(x[rs1]) << (x[rs2] & 0x1F));
 					pc = pc + 4;
 					break;
 
 				case 0x02:	cout << "SLT detected" << endl;			// SLT detected (R-type)
-					if (x[rs1] < x[rs2])
+					if (int32_t(x[rs1]) < int32_t(x[rs2]))
 						x[rd] = 1;
 					else
 						x[rd] = 0;
@@ -247,7 +247,7 @@ int main(int argc, char* argv[]) {
 					break;
 
 				case 0x05:	cout << "SRL detected" << endl;			// SRL detected (R-type)
-					x[rd] = x[rs1] >> x[rs2];
+					x[rd] = ((uint32_t(x[rs1])) >> (x[rs2] & 0x1F));
 					pc = pc + 4;
 					break;
 
@@ -271,7 +271,7 @@ int main(int argc, char* argv[]) {
 					break;
 
 				case 0x05: cout << "SRA detected" << endl;			// SRA detected (R-type)
-					// Operation here
+					x[rd] = (int32_t(x[rs1]) >> (x[rs2] & 0x1F));
 					pc = pc + 4;
 					break;
 				}
@@ -285,19 +285,19 @@ int main(int argc, char* argv[]) {
 			switch (funct3) {
 			case 0x00:	cout << "LB detected" << endl;				// LB detected (I-type)
 				// Operation here
-				x[rd] = mem_acc((II + x[rs1]), 1);
+				int32_t(x[rd]) = mem_acc((II + x[rs1]), 1);
 				pc = pc + 4;
 				break;
 
 			case 0x01: cout << "LH detected" << endl;				// LH detected (I-type)
 				// Operation here
-				x[rd] = mem_acc((II + x[rs1]), 2);
+				int32_t(x[rd]) = mem_acc((II + x[rs1]), 2);
 				pc = pc + 4;
 				break;
 
 			case 0x02: cout << "LW detected" << endl;				// LW detected (I-type)
 				// Operation here
-				x[rd] = mem_acc((II + x[rs1]), 4);
+				int32_t(x[rd]) = mem_acc((II + x[rs1]), 4);
 				pc = pc + 4;
 				break;
 
@@ -323,7 +323,7 @@ int main(int argc, char* argv[]) {
 				break;
 
 			case 0x02: cout << "SLTI detected" << endl;				// SLTI detected (I-type)
-				if (x[rs1] > II)
+				if (int32_t(x[rs1]) < II)
 					x[rd] = 1;
 				else
 					x[rd] = 0;
@@ -331,8 +331,7 @@ int main(int argc, char* argv[]) {
 				break;
 
 			case 0x03: cout << "SLTIU detected" << endl;			// SLTIU detected (I-type)
-				II = (curr_instr & (0xFFF00000)) >> 20;
-				if (x[rs1] > II)
+				if (uint32_t(x[rs1]) < uint32_t(II))
 					x[rd] = 1;
 				else
 					x[rd] = 0;
@@ -354,18 +353,20 @@ int main(int argc, char* argv[]) {
 				pc = pc + 4;
 				break;
 				
-			case 0x01: cout << "SLLI detected" << endl;
+			case 0x01: cout << "SLLI detected" << endl;             //SLLI detected (I-type)
 				x[rd] = x[rs1] << rs2;
 				pc = pc + 4;
 				break;
 				
 			case 0x05: 
 				switch(funct7){
-				case 0x00: cout << "SRLI detected" << endl;
+				case 0x00: cout << "SRLI detected" << endl;         //SRLI detected (I-type)
+					x[rd] = uint32_t(x[rs1]) >> rs2;
 					pc = pc + 4;
 					break;
 					
-				case 0x20: cout << "SRAI detected" << endl;
+				case 0x20: cout << "SRAI detected" << endl;         //SRLI detected (I-type)
+					x[rd] = int32_t(x[rs1]) >> rs2;
 					pc = pc + 4;
 					break;
 				}
@@ -423,14 +424,14 @@ int main(int argc, char* argv[]) {
 
 			case 0x04: cout << "BLT detected" << endl;				// BLT detected (B-type)
 				x[14]=2;
-				if (x[rs1] < x[rs2])
+				if (int32_t(x[rs1]) < int32_t(x[rs2]))
 					pc = pc + BI;
 				else
 					pc = pc + 4;
 				break;
 
 			case 0x05: cout << "BGE detected" << endl;				// BGE detected (B-type)
-				if (x[rs1] >= x[rs2])
+				if (int32_t(x[rs1]) >= int32_t(x[rs2]))
 					pc = pc + BI;
 				else
 					pc = pc + 4;
@@ -461,7 +462,7 @@ int main(int argc, char* argv[]) {
 			break;
 
 		case 0x17: cout << "U-type Instruction" << endl;
-																			// AUIPC
+			// AUIPC
 			UI = immediate(opcode, curr_instr);
 			cout << "AUIPC detected" << endl;
 			x[rd] = pc + UI;
