@@ -274,6 +274,47 @@ int main(int argc, char* argv[]) {
 					break;
 				}
 				break;
+				
+				//RISC-V 32I- M Standard Extension for Integer Multiplication and Division (Extra Credit)
+				
+			case 0x01:
+				switch (funct3) {
+				case 0x00: cout << "MUL detected" << endl; 						//MUL detected (R-type RV32M)
+					x[rd] = (int32_t (x[rs1])) * (int32_t (x[rs2]));	
+					break;
+			
+				case 0x01: cout << "MULH detected" << endl; 						//MULH detected (R-type RV32M)
+					x[rd] = ((int32_t (x[rs1])) * (int32_t (x[rs2]))) >> 0xFFFFFFFF00000000 
+					break;
+				
+				case 0x02: cout << "MULHSU detected" << endl; 						//MULHSU detected
+					x[rd] = ((int32_t (x[rs1])) * (uint32_t (x[rs2]))) >> 0xFFFFFFFF00000000 
+					break;
+				
+				case 0x03: cout << "MULHU detected" << endl; 						//MULHU detected
+					x[rd] = ((uint32_t (x[rs1])) * (uint32_t (x[rs2]))) >> 0xFFFFFFFF00000000 
+					break;
+				
+				case 0x04: cout << "DIV detected" << endl;  						//DIV detected
+					x[rd] = (x[rs1]) / (int32_t (x[rs1])) 	
+					break;
+				
+				case 0x05: cout << "DIVU detected" << endl; 						//DIVU detected
+					x[rd] = (x[rs1]) / (uint32_t (x[rs1]))  
+					break;
+				
+				case 0x06: cout << "REM detected" << endl;						//REM detected
+					x[rd] = (x[rs1]) % (uint32_t (x[rs1])) 
+					break;
+				
+				case 0x07: cout << "REMU detected" << endl;						//REMU detected
+					x[rd] = (x[rs1]) % (uint32_t (x[rs2]))
+					break;
+				}
+				break;
+			
+				
+				//RISC-V 32I- M Standard Extension for Integer Multiplication and Division (Extra Credit)
 
 			case 0x20:
 				switch (funct3) {
