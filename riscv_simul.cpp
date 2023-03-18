@@ -25,16 +25,28 @@ int file;
 uint8_t memory_array[65536] = {};		// Memory in bytes
 uint32_t x[32] = {}; 					// r0 is zero
 
-uint32_t mem_acc(int mem_p, int b) {
+int i;
+
+// Initialize regs
+
+uint32_t mem_acc(int mem_p, int b, int sign) {
 	uint32_t mem_cont;
 	if (b == 4) {
 		mem_cont = memory_array[mem_p] | memory_array[mem_p + 1] << 8 | memory_array[mem_p + 2] << 16 | memory_array[mem_p + 3] << 24;
 	}
 	else if (b == 2) {
 		mem_cont = memory_array[mem_p] | memory_array[mem_p + 1] << 8;
+		if (sign) {
+			if(mem_cont >> 15)
+				mem_cont = mem_cont | 0xFFFF0000;
+		}
 	}
 	else {
 		mem_cont = memory_array[mem_p];
+		if (sign) {
+			if(mem_cont >> 7)
+				mem_cont = mem_cont | 0xFFFFFF00;
+		}
 	}
 	return mem_cont;
 }
@@ -284,27 +296,27 @@ int main(int argc, char* argv[]) {
 			II = immediate(opcode, curr_instr);
 			switch (funct3) {
 			case 0x00:	cout << "LB detected" << endl;				// LB detected (I-type)
-				x[rd] = int32_t(mem_acc((II + x[rs1]), 1));
+				x[rd] = (mem_acc((II + x[rs1]), 1,1));
 				pc = pc + 4;
 				break;
 
 			case 0x01: cout << "LH detected" << endl;				// LH detected (I-type)
-				x[rd] = int32_t(mem_acc((II + x[rs1]), 2));
+				x[rd] = (mem_acc((II + x[rs1]), 2,1));
 				pc = pc + 4;
 				break;
 
 			case 0x02: cout << "LW detected" << endl;				// LW detected (I-type)
-				x[rd] = int32_t(mem_acc((II + x[rs1]), 4));
+				x[rd] = (mem_acc((II + x[rs1]), 4,1));
 				pc = pc + 4;
 				break;
 
 			case 0x04: cout << "LBU detected" << endl;				// LBU detected (I-type)
-				// Operation here
+				x[rd] = (mem_acc((II + x[rs1]), 1,0));
 				pc = pc + 4;
 				break;
 
 			case 0x05: cout << "LHU detected" << endl;				// LHU detected (I-type)
-				// Operation here
+				x[rd] = (mem_acc((II + x[rs1]), 2,0));
 				pc = pc + 4;
 				break;
 			}
@@ -451,7 +463,7 @@ int main(int argc, char* argv[]) {
 			break;
 
 		case 0x37: cout << "U-type Instruction" << endl;
-			// LUI
+																	// LUI
 			UI = immediate(opcode, curr_instr);
 			cout << "LUI detected" << endl;
 			x[rd] = UI;
@@ -473,8 +485,6 @@ int main(int argc, char* argv[]) {
 			x[rd] = pc + 4;
 			pc = pc + JI;
 			break;
-
-			// !!! Need to check on SLLI, SRLI and SRAI - opcode is 0x13, but not I type? !!!
 
 		case 0x0F: cout << "FENCE detected" << endl;
 			// FENCE
