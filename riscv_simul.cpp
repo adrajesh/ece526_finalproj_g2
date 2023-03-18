@@ -130,6 +130,7 @@ int main(int argc, char* argv[]) {
 	uint32_t f_byte[4];
 	int program_space;
 	int t;
+	uint64_t md;
 
 	switch (argc) {
 	case 1: infile.open(I_FILENAME);			// No Arguments provided. Read program.mem, pc 0, sa 65535, verbose disabled
@@ -284,31 +285,35 @@ int main(int argc, char* argv[]) {
 					break;
 			
 				case 0x01: cout << "MULH detected" << endl; 						//MULH detected (R-type RV32M)
-					x[rd] = ((int32_t (x[rs1])) * (int32_t (x[rs2]))) >> 0xFFFFFFFF00000000 
+					md = ((int32_t (x[rs1])) * (int32_t (x[rs2])));
+					x[rd] = md >> 32;
 					break;
 				
 				case 0x02: cout << "MULHSU detected" << endl; 						//MULHSU detected
-					x[rd] = ((int32_t (x[rs1])) * (uint32_t (x[rs2]))) >> 0xFFFFFFFF00000000 
+					md = ((int32_t (x[rs1])) * (uint32_t (x[rs2])));
+					x[rd] = md >> 32;
 					break;
 				
 				case 0x03: cout << "MULHU detected" << endl; 						//MULHU detected
-					x[rd] = ((uint32_t (x[rs1])) * (uint32_t (x[rs2]))) >> 0xFFFFFFFF00000000 
+					md = ((uint32_t (x[rs1])) * (uint32_t (x[rs2]))); 
+					x[rd] = md >> 32;
+
 					break;
 				
 				case 0x04: cout << "DIV detected" << endl;  						//DIV detected
-					x[rd] = (x[rs1]) / (int32_t (x[rs1])) 	
+					x[rd] = (x[rs1]) / (int32_t (x[rs1])); 	
 					break;
 				
 				case 0x05: cout << "DIVU detected" << endl; 						//DIVU detected
-					x[rd] = (x[rs1]) / (uint32_t (x[rs1]))  
+					x[rd] = (x[rs1]) / (uint32_t (x[rs1]));  
 					break;
 				
 				case 0x06: cout << "REM detected" << endl;						//REM detected
-					x[rd] = (x[rs1]) % (uint32_t (x[rs1])) 
+					x[rd] = (x[rs1]) % (uint32_t (x[rs1])); 
 					break;
 				
 				case 0x07: cout << "REMU detected" << endl;						//REMU detected
-					x[rd] = (x[rs1]) % (uint32_t (x[rs2]))
+					x[rd] = (x[rs1]) % (uint32_t (x[rs2]));
 					break;
 				}
 				break;
@@ -342,13 +347,29 @@ int main(int argc, char* argv[]) {
 				break;
 
 			case 0x01: cout << "LH detected" << endl;				// LH detected (I-type)
+				if((II + x[rs1])%2==0)
+				{
 				x[rd] = (mem_acc((II + x[rs1]), 2,1));
 				pc = pc + 4;
+				}
+				else
+				{
+				cout<<"Unaligned mem reference"<<endl;
+				pc = program_space - 4;	
+				}
 				break;
 
 			case 0x02: cout << "LW detected" << endl;				// LW detected (I-type)
+				if((II + x[rs1])%4==0)
+				{
 				x[rd] = (mem_acc((II + x[rs1]), 4,1));
 				pc = pc + 4;
+				}
+				else
+				{	
+				cout<<"Unaligned mem reference"<<endl;
+				pc = program_space - 4;
+				}
 				break;
 
 			case 0x04: cout << "LBU detected" << endl;				// LBU detected (I-type)
@@ -357,8 +378,16 @@ int main(int argc, char* argv[]) {
 				break;
 
 			case 0x05: cout << "LHU detected" << endl;				// LHU detected (I-type)
+				if((II + x[rs1])%2==0)
+				{
 				x[rd] = (mem_acc((II + x[rs1]), 2,0));
 				pc = pc + 4;
+				}
+				else
+				{
+				cout<<"Unaligned mem reference"<<endl;
+				pc = program_space - 4;	
+				}
 				break;
 			}
 			break;
