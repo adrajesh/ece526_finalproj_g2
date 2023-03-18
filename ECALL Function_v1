@@ -1,0 +1,85 @@
+#include <unistd.h> // for read, write, and exit functions
+#include <iostream>
+
+int FD;
+
+int buffer[100];
+
+int size_t size;
+
+
+int read_syscall( FD, buffer, size)
+	int output_r;
+	{
+		asm volatile (
+		"li a7, 63\n" //Loads the value 63 into register a7, which is the register used to specify which system call to make.
+        "mv a0, %1\n" // Moves the value of FD into a0. %1 is 2nd input operand.
+        "mv a1, %2\n"	//mov value of buffer. %2 is 3rd input
+        "mv a2, %3\n"	// mov value of size. %3 is 4th input 
+        "ecall\n"		// makes system call
+        "mv %0, a0\n"	//mov value from output a0 to return value output 
+        : "=r"(ret) // output operand
+        : "r"(FD), "r"(buffer), "r"(size) // input operands
+        : "a0", "a1", "a2", "a7" // clobbered registers
+		);
+		return output;
+	}
+	
+int write_syscall (FD, buffer, size)
+	int output_w;
+	{
+		asm volatile (
+		"li a7, 64\n"
+        "mv a0, %1\n"
+        "mv a1, %2\n"
+        "mv a2, %3\n"
+        "ecall\n"
+        "mv %0, a0\n"
+        : "=r"(ret) // output operand
+        : "r"(FD), "r"(buffer), "r"(size) // input operands
+        : "a0", "a1", "a2", "a7" // clobbered registers
+        );
+		return output_w;
+	}
+	
+void exit_syscall (int output)
+	{
+		asm volatile (
+		 "li a7, 94\n"
+        "mv a0, %0\n"
+        "ecall\n"
+        :
+        : "r"(ret) // input operand
+        : "a0", "a7" // clobbered registers
+		);
+	}
+
+using namespace std;	
+int main ()
+	//read from stdin
+	{
+		int num_bytes_read = read_syscall(0, buffer, sizeof(buffer)); // takes num_bytes_read from the above function. Max no. of char  to store => sizeof (max size of buffer)
+		if (num_bytes_read == -1)
+		{
+			cout << "error in read";
+		}
+		else
+			cout << "Number of bytes read =" << return output_r;
+	}	// not sure to put return 0 or return output 
+	//write to stdout
+	{
+		int num_bytes_write = write_syscall(1, buffer, strlen(buffer));	// checks lenght of string = buffer address 
+		if (num_bytes_write == -1)
+		{
+			cout << "error in write";
+		}
+		else 
+			cout << "Number of bytes written = " << return output_w;
+	}
+	//exit 
+	{
+		exit_syscall(0);
+	}
+
+
+
