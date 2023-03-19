@@ -25,16 +25,28 @@ int file;
 uint8_t memory_array[65536] = {};		// Memory in bytes
 uint32_t x[32] = {}; 					// r0 is zero
 
-uint32_t mem_acc(int mem_p, int b) {
+int i;
+
+// Initialize regs
+
+uint32_t mem_acc(int mem_p, int b, int sign) {
 	uint32_t mem_cont;
 	if (b == 4) {
 		mem_cont = memory_array[mem_p] | memory_array[mem_p + 1] << 8 | memory_array[mem_p + 2] << 16 | memory_array[mem_p + 3] << 24;
 	}
 	else if (b == 2) {
 		mem_cont = memory_array[mem_p] | memory_array[mem_p + 1] << 8;
+		if (sign) {
+			if(mem_cont >> 15)
+				mem_cont = mem_cont | 0xFFFF0000;
+		}
 	}
 	else {
 		mem_cont = memory_array[mem_p];
+		if (sign) {
+			if(mem_cont >> 7)
+				mem_cont = mem_cont | 0xFFFFFF00;
+		}
 	}
 	return mem_cont;
 }
@@ -118,6 +130,7 @@ int main(int argc, char* argv[]) {
 	uint32_t f_byte[4];
 	int program_space;
 	int t;
+	uint64_t md;
 
 	switch (argc) {
 	case 1: infile.open(I_FILENAME);			// No Arguments provided. Read program.mem, pc 0, sa 65535, verbose disabled
@@ -264,7 +277,50 @@ int main(int argc, char* argv[]) {
 					break;
 				}
 				break;
+				
+			//RISC-V 32I- M Standard Extension for Integer Multiplication and Division (Extra Credit)
+			case 0x01:
+				switch (funct3) {
+				case 0x00: cout << "MUL detected" << endl; 						//MUL detected (R-type RV32M)
+					x[rd] = (int32_t (x[rs1])) * (int32_t (x[rs2]));	
+					break;
+			
+				case 0x01: cout << "MULH detected" << endl; 						//MULH detected (R-type RV32M)
+					md = ((int32_t (x[rs1])) * (int32_t (x[rs2])));
+					x[rd] = md >> 32;
+					break;
+				
+				case 0x02: cout << "MULHSU detected" << endl; 						//MULHSU detected
+					md = ((int32_t (x[rs1])) * (uint32_t (x[rs2])));
+					x[rd] = md >> 32;
+					break;
+				
+				case 0x03: cout << "MULHU detected" << endl; 						//MULHU detected
+					md = ((uint32_t (x[rs1])) * (uint32_t (x[rs2]))); 
+					x[rd] = md >> 32;
 
+					break;
+				
+				case 0x04: cout << "DIV detected" << endl;  						//DIV detected
+					x[rd] = (x[rs1]) / (int32_t (x[rs1])); 	
+					break;
+				
+				case 0x05: cout << "DIVU detected" << endl; 						//DIVU detected
+					x[rd] = (x[rs1]) / (uint32_t (x[rs1]));  
+					break;
+				
+				case 0x06: cout << "REM detected" << endl;						//REM detected
+					x[rd] = (x[rs1]) % (uint32_t (x[rs1])); 
+					break;
+				
+				case 0x07: cout << "REMU detected" << endl;						//REMU detected
+					x[rd] = (x[rs1]) % (uint32_t (x[rs2]));
+					break;
+				}
+				break;
+			
+				
+			//RISC-V 32I- M Standard Extension for Integer Multiplication and Division (Extra Credit)
 			case 0x20:
 				switch (funct3) {
 				case 0x00:	cout << "SUB detected" << endl;			// SUB detected (R-type)
@@ -286,28 +342,46 @@ int main(int argc, char* argv[]) {
 			II = immediate(opcode, curr_instr);
 			switch (funct3) {
 			case 0x00:	cout << "LB detected" << endl;				// LB detected (I-type)
-				x[rd] = int32_t(mem_acc((II + x[rs1]), 1));
+				x[rd] = (mem_acc((II + x[rs1]), 1,1));
 				pc = pc + 4;
 				break;
 
 			case 0x01: cout << "LH detected" << endl;				// LH detected (I-type)
-				x[rd] = int32_t(mem_acc((II + x[rs1]), 2));
-				pc = pc + 4;
+				if((II + x[rs1])%2==0){
+					x[rd] = (mem_acc((II + x[rs1]), 2,1));
+					pc = pc + 4;
+				}
+				else{
+					cout<<"Unaligned mem reference"<<endl;
+					pc = program_space - 4;	
+				}
 				break;
 
 			case 0x02: cout << "LW detected" << endl;				// LW detected (I-type)
-				x[rd] = int32_t(mem_acc((II + x[rs1]), 4));
-				pc = pc + 4;
+				if((II + x[rs1])%4==0){
+					x[rd] = (mem_acc((II + x[rs1]), 4,1));
+					pc = pc + 4;
+				}
+				else{	
+					cout<<"Unaligned mem reference"<<endl;
+					pc = program_space - 4;
+				}
 				break;
 
 			case 0x04: cout << "LBU detected" << endl;				// LBU detected (I-type)
-				// Operation here
+				x[rd] = (mem_acc((II + x[rs1]), 1,0));
 				pc = pc + 4;
 				break;
 
 			case 0x05: cout << "LHU detected" << endl;				// LHU detected (I-type)
-				// Operation here
-				pc = pc + 4;
+				if((II + x[rs1])%2==0){
+					x[rd] = (mem_acc((II + x[rs1]), 2,0));
+					pc = pc + 4;
+				}
+				else{
+					cout<<"Unaligned mem reference"<<endl;
+					pc = program_space - 4;	
+				}
 				break;
 			}
 			break;
@@ -453,7 +527,7 @@ int main(int argc, char* argv[]) {
 			break;
 
 		case 0x37: cout << "U-type Instruction" << endl;
-			// LUI
+																	// LUI
 			UI = immediate(opcode, curr_instr);
 			cout << "LUI detected" << endl;
 			x[rd] = UI;
@@ -476,8 +550,6 @@ int main(int argc, char* argv[]) {
 			pc = pc + JI;
 			break;
 
-			// !!! Need to check on SLLI, SRLI and SRAI - opcode is 0x13, but not I type? !!!
-
 		case 0x0F: cout << "FENCE detected" << endl;
 			// FENCE
 			break;
@@ -489,6 +561,7 @@ int main(int argc, char* argv[]) {
 		default: cout << "Opcode doesn't exist" << endl;
 			break;
 		}
+<<<<<<< HEAD
 		case 0x07: cout << "Floating point I-type Instruction" << endl;
 			switch (funct3) {
 				case 0x2: "FLW detected"
@@ -499,6 +572,8 @@ int main(int argc, char* argv[]) {
 		case 0x4F: cout << "Floating point R4-type Instruction" << endl;
 		case 0x53: cout << "Floating point R-type Instruction" << endl;
 		cout<<pc<<endl;
+=======
+>>>>>>> origin
 		print_regs();
 	}
 	// For printing the contents of memory into a file - memory_array.txt
@@ -506,5 +581,9 @@ int main(int argc, char* argv[]) {
 		outfile << i << " : " << std::hex << std::setw(2) << setfill('0') << static_cast<int>(memory_array[i]) << endl;
 	}
 	outfile.close();
+	if(pc % 4 != 0){
+		cout << "Unaligned pc" << endl;
+		pc = program_space - 4;
+	}
 	return 0;
 }
