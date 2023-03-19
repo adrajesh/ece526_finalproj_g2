@@ -122,7 +122,7 @@ int main(int argc, char* argv[]) {
 	unsigned int trace[2];
 	uint32_t instr, curr_instr;
 	uint32_t file_pc;
-	uint32_t opcode, funct3, funct7, rd, rs1, rs2;
+	uint32_t opcode, funct3, funct7,funct2, rd, rs1, rs2,rs3;
 	int32_t II, SI, BI, UI, JI; 						// Immediate fields 
 	bool MSBimmediate;
 	uint32_t memory_loc;
@@ -558,50 +558,148 @@ int main(int argc, char* argv[]) {
 			// ECALL, EBREAK
 			break;
 
-		default: cout << "Opcode doesn't exist" << endl;
-			break;
-		}
+		
 		case 0x07: cout << "Floating point I-type Instruction" << endl;
 			switch (funct3) {
 				case 0x2: cout << "FLW detected" << endl;
 					break;
 				}
+			break;
 		case 0x27: cout << "Floating point S-type Instruction" << endl;
 			switch (funct3) {
 				case 0x2: cout << "FSW detected" << endl;
 					break;
 				}
+			break;
 		case 0x43: cout << "Floating point R4-type Instruction" << endl;
 			switch (funct3) {
 			
 				case 0x7:
 				 		switch (funct2) {
 							case 0x0: cout << "FMADD.S detected" << endl;
-								break;
-			                        	} 
-			                  break;
-				}		
+							break;
+			                        } 
+			                  	break;
+				}
+			break;		
 		case 0x47: cout << "Floating point R4-type Instruction" << endl;
-			  case 0x7:
+			switch (funct3) {
+				
+			  	case 0x7:
 				 		switch (funct2) {
 							case 0x0: cout << "FMSUB.S detected" << endl;
-								break;
+							break;
 			                        	} 
-			                  break;
-				}
+			                  	break;
+			                  }	
 		case 0x4B: cout << "Floating point R4-type Instruction" << endl;
-			   case 0x7:
+			   switch (funct3) {	
+			   	case 0x7:
 				 		switch (funct2) {
-							case 0x0: cout << "FMADD.S detected" << endl;
-								break;
+							case 0x0: cout << "FNMSUB.S detected" << endl;
+							break;
 			                        	} 
-			                  break;
-				}	
+			                  	break;
+			                  }
 		case 0x4F: cout << "Floating point R4-type Instruction" << endl;
+			   switch (funct3) {	
+			   	case 0x7:
+				 		switch (funct2) {
+							case 0x0: cout << "FNMADD.S detected" << endl;
+							break;
+			                        	} 
+			                  	break;
+					}
+									
 		case 0x53: cout << "Floating point R-type Instruction" << endl;
+			  switch (funct3) {
+				
+			  	case 0x7:		
+				 		switch (funct7) {
+							case 0x00: cout << "FADD.S detected" << endl;
+							break;
+
+							case 0x04: cout << "FSUB.S detected" << endl;
+							break;
+							
+							case 0x08: cout << "FMUL.S detected" << endl;
+							break;
+
+							case 0x0C: cout << "FDIV.S detected" << endl;
+							break;
+							
+							case 0x2C: cout << "FSQRT.S detected" << endl;
+							break;
+							
+							case 0x60:
+								switch (rs2) { 
+								 	case 0x00: cout << "FCVT.W.S detected" << endl;
+								 	break;
+								 	case 0x01: cout << "FCVT.WU.S detected" << endl;
+								 	break;
+								 	}
+							break;
+							
+							case 0x68:
+								switch (rs2) { 
+								 	case 0x00: cout << "FCVT.S.W detected" << endl;
+								 	break;
+								 	case 0x01: cout << "FCVT.S.WU detected" << endl;
+								 	break;
+								 	}
+							break;
+							
+			  			}
+			  			break;
+				 case 0x0:
+			 			switch (funct7) {
+							case 0x10: cout << "FSGNJ.S detected" << endl;
+							break;
+							
+							case 0x14: cout << "FMIN.S detected" << endl;
+							break;
+							
+							case 0x78: cout << "FMV.X.W detected" << endl;
+							break;
+							
+							case 0x50: cout << ".FLE.S detected" << endl;
+							break;
+							
+							case 0x70: cout << "FMV.W.X detected" << endl;
+							break;
+			  				}
+			  		        break;
+				 case 0x1:
+			 			switch (funct7) {
+							case 0x10: cout << "FSGNJN.S detected" << endl;
+							break;
+							
+							case 0x14: cout << "FMAX.S detected" << endl;
+							break;
+							
+							case 0x50: cout << "FLT.S detected" << endl;
+							break;
+							
+							case 0x70: cout << "FCLASS.S detected" << endl;
+							break;
+			  				}
+			  			break;
+				 case 0x2:
+			 			switch (funct7) {
+							case 0x10: cout << "FSGNJX.S detected" << endl;
+							break;
+							
+							case 0x50: cout << "FEQ.S detected" << endl;
+							break;
+			  				}
+			  			break;
+			  	
+				default: cout << "Opcode doesn't exist" << endl;
+				break;
+				}
+		}
 		cout<<pc<<endl;
-=======
->>>>>>> origin
+
 		print_regs();
 	}
 	// For printing the contents of memory into a file - memory_array.txt
