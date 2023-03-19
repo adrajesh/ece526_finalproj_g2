@@ -600,8 +600,7 @@ int main(int argc, char* argv[]) {
 		case 0x4F: cout << "Floating point R4-type Instruction" << endl;
 		case 0x53: cout << "Floating point R-type Instruction" << endl;
 		cout<<pc<<endl;
-=======
->>>>>>> origin
+
 		print_regs();
 	}
 	// For printing the contents of memory into a file - memory_array.txt
