@@ -565,6 +565,7 @@ int main(int argc, char* argv[]) {
 			switch (funct3) {
 			case 0x2: cout << "FLW detected" << endl;
 				//operation here
+				pc = pc + 4;
 				break;
 			}
 			break;
@@ -572,6 +573,7 @@ int main(int argc, char* argv[]) {
 			switch (funct3) {
 			case 0x2: cout << "FSW detected" << endl;
 				//operation here
+				pc = pc + 4;
 				break;
 			}
 			break;
@@ -582,7 +584,8 @@ int main(int argc, char* argv[]) {
 				switch (funct2) {
 				case 0x0: cout << "FMADD.S detected" << endl;
 					f[rd] = (f[rs1] * f[rs2]) + f[rs3];  		//FMADD.S 
-					break;
+					pc = pc + 4;
+					  break;
 				}
 				break;
 			}
@@ -594,6 +597,7 @@ int main(int argc, char* argv[]) {
 				switch (funct2) {
 				case 0x0: cout << "FMSUB.S detected" << endl;
 					f[rd] = (f[rs1] * f[rs2]) - f[rs3];  		//FMSUB.S
+					pc = pc + 4;
 					break;
 				}
 				break;
@@ -604,6 +608,7 @@ int main(int argc, char* argv[]) {
 				switch (funct2) {
 				case 0x0: cout << "FNMSUB.S detected" << endl;
 					f[rd] = (-(f[rs1] * f[rs2])) + f[rs3]; 		//FNMSUB.S
+					pc = pc + 4;
 					break;
 				}
 				break;
@@ -614,6 +619,7 @@ int main(int argc, char* argv[]) {
 				switch (funct2) {
 				case 0x0: cout << "FNMADD.S detected" << endl;
 					f[rd] = (-(f[rs1] * f[rs2])) - f[rs3]; 		//FNMADD.S
+					pc = pc + 4;
 					break;
 				}
 				break;
@@ -626,31 +632,38 @@ int main(int argc, char* argv[]) {
 				switch (funct7) {
 				case 0x00: cout << "FADD.S detected" << endl;
 					f[rd] = f[rs1] + f[rs2];					//FADD.S
+					pc = pc + 4;
 					break;
 
 				case 0x04: cout << "FSUB.S detected" << endl;
 					f[rd] = f[rs1] - f[rs2];					//FSUB.S
+					pc = pc + 4;
 					break;
 
 				case 0x08: cout << "FMUL.S detected" << endl;
 					f[rd] = f[rs1] * f[rs2];					//FMUL.S
+					pc = pc + 4;
 					break;
 
 				case 0x0C: cout << "FDIV.S detected" << endl;
 					f[rd] = f[rs1] / f[rs2];					//FDIV.S
+					pc = pc + 4;
 					break;
 
 				case 0x2C: cout << "FSQRT.S detected" << endl;
 					f[rd] = sqrt(f[rs1]);						//FSQRT.S
+					pc = pc + 4;
 					break;
 
 				case 0x60:
 					switch (rs2) {
 					case 0x00: cout << "FCVT.W.S detected" << endl;
 						//operation here
+						pc = pc + 4;
 						break;
 					case 0x01: cout << "FCVT.WU.S detected" << endl;
 						//operation here
+						pc = pc + 4;
 						break;
 					}
 					break;
@@ -659,9 +672,11 @@ int main(int argc, char* argv[]) {
 					switch (rs2) {
 					case 0x00: cout << "FCVT.S.W detected" << endl;
 						f[rd] = float(int32_t(x[rs1]));		//FCVT.S.W
+						pc = pc + 4;
 						break;
 					case 0x01: cout << "FCVT.S.WU detected" << endl;
 						f[rd] = float(uint32_t(x[rs1]));	//FCVT.S.WU
+						pc = pc + 4;
 						break;
 					}
 					break;
@@ -673,10 +688,12 @@ int main(int argc, char* argv[]) {
 				case 0x10: cout << "FSGNJ.S detected" << endl;
 					//uint32_t temp1 = 0x80000000; uint32_t temp2 = 0x7FFFFFFF; uint32_t temp = (f[rs2] & temp1) >> 32; f[rd] = (f[rs1] & temp2) | (temp << 31);
 				   //f[rd] = { f[rs2] & 0x80000000 | f[rs1] & 0x7FFFFFFF };	//FSGNJ.S
+					pc = pc + 4;
 					break;
 
 				case 0x14: cout << "FMIN.S detected" << endl;
 					f[rd] = min(f[rs1], f[rs2]);		 //FMIN.S
+					pc = pc + 4;
 					break;
 
 				case 0x78: cout << "FMV.X.W detected" << endl;
@@ -685,7 +702,7 @@ int main(int argc, char* argv[]) {
 					float* ptr = reinterpret_cast<float*>(&value);
 					f[rd] = *ptr;			//FMV.W.X
 				}
-
+				pc = pc + 4;
 				break;
 
 				case 0x50: cout << ".FLE.S detected" << endl;
@@ -695,10 +712,12 @@ int main(int argc, char* argv[]) {
 					else {					//FLE.S
 						f[rd] = 0;
 					}
+					pc = pc + 4;
 					break;
 
 				case 0x70: cout << "FMV.W.X detected" << endl;
 					//operation here
+					pc = pc + 4;
 					break;
 				}
 				break;
@@ -706,10 +725,12 @@ int main(int argc, char* argv[]) {
 				switch (funct7) {
 				case 0x10: cout << "FSGNJN.S detected" << endl;
 					//f[rd] = { ((!(f[rs2] & 0x80000000)) | (f[rs1] & 0x7FFFFFFF)) }; //FSGNJN.S
+					pc = pc + 4;
 					break;
 
 				case 0x14: cout << "FMAX.S detected" << endl;
 					f[rd] = max(f[rs1], f[rs2]);		//FMAX.S
+					pc = pc + 4;
 					break;
 
 				case 0x50: cout << "FLT.S detected" << endl;
@@ -719,10 +740,12 @@ int main(int argc, char* argv[]) {
 					else {					//FLT.S
 						f[rd] = 0;
 					}
+					pc = pc + 4;
 					break;
 
 				case 0x70: cout << "FCLASS.S detected" << endl;
 					//operation here
+					pc = pc + 4;
 					break;
 				}
 				break;
@@ -730,6 +753,7 @@ int main(int argc, char* argv[]) {
 				switch (funct7) {
 				case 0x10: cout << "FSGNJX.S detected" << endl;
 					//f[rd] = { (((f[rs1] & 0x80000000) ^ (f[rs2] & 0x80000000)) | (f[rs1] & 0x7FFFFFFF)) };	 //FSGNJX.S
+					pc = pc + 4;
 					break;
 
 				case 0x50: cout << "FEQ.S detected" << endl;
@@ -739,6 +763,7 @@ int main(int argc, char* argv[]) {
 					else {					//FEQ.S
 						f[rd] = 0;
 					}
+					pc = pc + 4;
 					break;
 				}
 				break;
