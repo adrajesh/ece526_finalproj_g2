@@ -9,6 +9,7 @@
 #include <cstring>
 #include <csignal>
 #include "immediate_field.cpp"
+#include <cmath>
 
 using namespace std;
 
@@ -24,6 +25,7 @@ int file;
 // uint32_t registers[32];
 uint8_t memory_array[65536] = {};		// Memory in bytes
 uint32_t x[32] = {}; 					// r0 is zero
+float f[32] = {};						//floating point registers
 
 int i;
 
@@ -37,14 +39,14 @@ uint32_t mem_acc(int mem_p, int b, int sign) {
 	else if (b == 2) {
 		mem_cont = memory_array[mem_p] | memory_array[mem_p + 1] << 8;
 		if (sign) {
-			if(mem_cont >> 15)
+			if (mem_cont >> 15)
 				mem_cont = mem_cont | 0xFFFF0000;
 		}
 	}
 	else {
 		mem_cont = memory_array[mem_p];
 		if (sign) {
-			if(mem_cont >> 7)
+			if (mem_cont >> 7)
 				mem_cont = mem_cont | 0xFFFFFF00;
 		}
 	}
@@ -122,7 +124,7 @@ int main(int argc, char* argv[]) {
 	unsigned int trace[2];
 	uint32_t instr, curr_instr;
 	uint32_t file_pc;
-	uint32_t opcode, funct3, funct7,funct2, rd, rs1, rs2,rs3;
+	uint32_t opcode, funct3, funct7, funct2, rd, rs1, rs2, rs3;
 	int32_t II, SI, BI, UI, JI; 						// Immediate fields 
 	bool MSBimmediate;
 	uint32_t memory_loc;
@@ -202,11 +204,11 @@ int main(int argc, char* argv[]) {
 		curr_instr = memory_array[pc] | (memory_array[pc + 1] << 8) | (memory_array[pc + 2] << 16) | (memory_array[pc + 3] << 24);
 		cout << endl << "pc: " << std::hex << std::uppercase << pc << " instr: " << std::hex << curr_instr << endl;
 		if (curr_instr == 0x00000000) {								// Check for all 0 instr
-			cout<<"Ending simulation !!! (all 0 instr)";
+			cout << "Ending simulation !!! (all 0 instr)";
 			break;
 		}
 		if ((curr_instr == 0x00008067) && (x[1] == 0)) {			// Check for jr ra where ra is 0
-			cout<<"Ending simulation !!! (jr ra 0)";
+			cout << "Ending simulation !!! (jr ra 0)";
 			break;
 		}
 		// Store everything regardless of instr type 
@@ -217,9 +219,9 @@ int main(int argc, char* argv[]) {
 		rs1 = (curr_instr & (0xF8000)) >> 15;						// bits [19:15]
 		rs2 = (curr_instr & (0x1F00000)) >> 20;						// bits [24:20]
 		funct2 = (curr_instr & (0x06000000)) >> 25;                                        // bits [26:25]
-		rs3 =  (curr_instr & (0xF8000000)) >> 27;
+		rs3 = (curr_instr & (0xF8000000)) >> 27;
 		// We have to calculate immediate fields also - refer page 16/17
-		
+
 		x[0] = 0;
 		// Enable this in debug mode
 		cout << std::uppercase << std::hex << "Opcode: " << opcode << " funct3: " << funct3 << " funct7: " << funct7 << endl;
@@ -277,50 +279,50 @@ int main(int argc, char* argv[]) {
 					break;
 				}
 				break;
-				
-			//RISC-V 32I- M Standard Extension for Integer Multiplication and Division (Extra Credit)
+
+				//RISC-V 32I- M Standard Extension for Integer Multiplication and Division (Extra Credit)
 			case 0x01:
 				switch (funct3) {
 				case 0x00: cout << "MUL detected" << endl; 						//MUL detected (R-type RV32M)
-					x[rd] = (int32_t (x[rs1])) * (int32_t (x[rs2]));	
+					x[rd] = (int32_t(x[rs1])) * (int32_t(x[rs2]));
 					break;
-			
+
 				case 0x01: cout << "MULH detected" << endl; 						//MULH detected (R-type RV32M)
-					md = ((int32_t (x[rs1])) * (int32_t (x[rs2])));
+					md = ((int32_t(x[rs1])) * (int32_t(x[rs2])));
 					x[rd] = md >> 32;
 					break;
-				
+
 				case 0x02: cout << "MULHSU detected" << endl; 						//MULHSU detected
-					md = ((int32_t (x[rs1])) * (uint32_t (x[rs2])));
+					md = ((int32_t(x[rs1])) * (uint32_t(x[rs2])));
 					x[rd] = md >> 32;
 					break;
-				
+
 				case 0x03: cout << "MULHU detected" << endl; 						//MULHU detected
-					md = ((uint32_t (x[rs1])) * (uint32_t (x[rs2]))); 
+					md = ((uint32_t(x[rs1])) * (uint32_t(x[rs2])));
 					x[rd] = md >> 32;
 
 					break;
-				
+
 				case 0x04: cout << "DIV detected" << endl;  						//DIV detected
-					x[rd] = (x[rs1]) / (int32_t (x[rs1])); 	
+					x[rd] = (x[rs1]) / (int32_t(x[rs1]));
 					break;
-				
+
 				case 0x05: cout << "DIVU detected" << endl; 						//DIVU detected
-					x[rd] = (x[rs1]) / (uint32_t (x[rs1]));  
+					x[rd] = (x[rs1]) / (uint32_t(x[rs1]));
 					break;
-				
+
 				case 0x06: cout << "REM detected" << endl;						//REM detected
-					x[rd] = (x[rs1]) % (uint32_t (x[rs1])); 
+					x[rd] = (x[rs1]) % (uint32_t(x[rs1]));
 					break;
-				
+
 				case 0x07: cout << "REMU detected" << endl;						//REMU detected
-					x[rd] = (x[rs1]) % (uint32_t (x[rs2]));
+					x[rd] = (x[rs1]) % (uint32_t(x[rs2]));
 					break;
 				}
 				break;
-			
-				
-			//RISC-V 32I- M Standard Extension for Integer Multiplication and Division (Extra Credit)
+
+
+				//RISC-V 32I- M Standard Extension for Integer Multiplication and Division (Extra Credit)
 			case 0x20:
 				switch (funct3) {
 				case 0x00:	cout << "SUB detected" << endl;			// SUB detected (R-type)
@@ -342,45 +344,45 @@ int main(int argc, char* argv[]) {
 			II = immediate(opcode, curr_instr);
 			switch (funct3) {
 			case 0x00:	cout << "LB detected" << endl;				// LB detected (I-type)
-				x[rd] = (mem_acc((II + x[rs1]), 1,1));
+				x[rd] = (mem_acc((II + x[rs1]), 1, 1));
 				pc = pc + 4;
 				break;
 
 			case 0x01: cout << "LH detected" << endl;				// LH detected (I-type)
-				if((II + x[rs1])%2==0){
-					x[rd] = (mem_acc((II + x[rs1]), 2,1));
+				if ((II + x[rs1]) % 2 == 0) {
+					x[rd] = (mem_acc((II + x[rs1]), 2, 1));
 					pc = pc + 4;
 				}
-				else{
-					cout<<"Unaligned mem reference"<<endl;
-					pc = program_space - 4;	
+				else {
+					cout << "Unaligned mem reference" << endl;
+					pc = program_space - 4;
 				}
 				break;
 
 			case 0x02: cout << "LW detected" << endl;				// LW detected (I-type)
-				if((II + x[rs1])%4==0){
-					x[rd] = (mem_acc((II + x[rs1]), 4,1));
+				if ((II + x[rs1]) % 4 == 0) {
+					x[rd] = (mem_acc((II + x[rs1]), 4, 1));
 					pc = pc + 4;
 				}
-				else{	
-					cout<<"Unaligned mem reference"<<endl;
+				else {
+					cout << "Unaligned mem reference" << endl;
 					pc = program_space - 4;
 				}
 				break;
 
 			case 0x04: cout << "LBU detected" << endl;				// LBU detected (I-type)
-				x[rd] = (mem_acc((II + x[rs1]), 1,0));
+				x[rd] = (mem_acc((II + x[rs1]), 1, 0));
 				pc = pc + 4;
 				break;
 
 			case 0x05: cout << "LHU detected" << endl;				// LHU detected (I-type)
-				if((II + x[rs1])%2==0){
-					x[rd] = (mem_acc((II + x[rs1]), 2,0));
+				if ((II + x[rs1]) % 2 == 0) {
+					x[rd] = (mem_acc((II + x[rs1]), 2, 0));
 					pc = pc + 4;
 				}
-				else{
-					cout<<"Unaligned mem reference"<<endl;
-					pc = program_space - 4;	
+				else {
+					cout << "Unaligned mem reference" << endl;
+					pc = program_space - 4;
 				}
 				break;
 			}
@@ -425,19 +427,19 @@ int main(int argc, char* argv[]) {
 				x[rd] = x[rs1] & II;
 				pc = pc + 4;
 				break;
-				
+
 			case 0x01: cout << "SLLI detected" << endl;             //SLLI detected (I-type)
 				x[rd] = x[rs1] << rs2;
 				pc = pc + 4;
 				break;
-				
-			case 0x05: 
-				switch(funct7){
+
+			case 0x05:
+				switch (funct7) {
 				case 0x00: cout << "SRLI detected" << endl;         //SRLI detected (I-type)
 					x[rd] = uint32_t(x[rs1]) >> rs2;
 					pc = pc + 4;
 					break;
-					
+
 				case 0x20: cout << "SRAI detected" << endl;         //SRLI detected (I-type)
 					x[rd] = int32_t(x[rs1]) >> rs2;
 					pc = pc + 4;
@@ -454,24 +456,24 @@ int main(int argc, char* argv[]) {
 			pc = ((x[rs1] + II) & 0xFFFFFFFE);
 			break;
 
-		case 0x23: cout << "S-type Instruction" << endl;			
+		case 0x23: cout << "S-type Instruction" << endl;
 			// SB,SH,SW
 			SI = immediate(opcode, curr_instr);
 			switch (funct3) {
 			case 0x00:	cout << "SB detected" << endl;				// SB detected (S-type)
-				mem_wr((SI + x[rs1]),1,x[rs2]);
+				mem_wr((SI + x[rs1]), 1, x[rs2]);
 				pc = pc + 4;
 				break;
 
 			case 0x01: cout << "SH detected" << endl;				// SH detected (S-type)
 				// Operation here
-				mem_wr((SI + x[rs1]),2,x[rs2]);
+				mem_wr((SI + x[rs1]), 2, x[rs2]);
 				pc = pc + 4;
 				break;
 
 			case 0x02: cout << "SW detected" << endl;				// SW detected (S-type)
 				// Operation here
-				mem_wr((SI + x[rs1]),4, x[rs2]);
+				mem_wr((SI + x[rs1]), 4, x[rs2]);
 				pc = pc + 4;
 				break;
 			}
@@ -492,11 +494,11 @@ int main(int argc, char* argv[]) {
 				if (x[rs1] != x[rs2])
 					pc = pc + BI;
 				else
-					pc = pc + 4; 
+					pc = pc + 4;
 				break;
 
 			case 0x04: cout << "BLT detected" << endl;				// BLT detected (B-type)
-				x[14]=2;
+				x[14] = 2;
 				if (int32_t(x[rs1]) < int32_t(x[rs2]))
 					pc = pc + BI;
 				else
@@ -527,7 +529,7 @@ int main(int argc, char* argv[]) {
 			break;
 
 		case 0x37: cout << "U-type Instruction" << endl;
-																	// LUI
+			// LUI
 			UI = immediate(opcode, curr_instr);
 			cout << "LUI detected" << endl;
 			x[rd] = UI;
@@ -545,7 +547,7 @@ int main(int argc, char* argv[]) {
 		case 0x6F: cout << "J-type Instruction" << endl;
 			// JAL
 			JI = immediate(opcode, curr_instr);
-			cout << "JAL detected" << endl; 
+			cout << "JAL detected" << endl;
 			x[rd] = pc + 4;
 			pc = pc + JI;
 			break;
@@ -558,147 +560,194 @@ int main(int argc, char* argv[]) {
 			// ECALL, EBREAK
 			break;
 
-		
+
 		case 0x07: cout << "Floating point I-type Instruction" << endl;
 			switch (funct3) {
-				case 0x2: cout << "FLW detected" << endl;
-					break;
-				}
+			case 0x2: cout << "FLW detected" << endl;
+				//operation here
+				break;
+			}
 			break;
 		case 0x27: cout << "Floating point S-type Instruction" << endl;
 			switch (funct3) {
-				case 0x2: cout << "FSW detected" << endl;
-					break;
-				}
+			case 0x2: cout << "FSW detected" << endl;
+				//operation here
+				break;
+			}
 			break;
 		case 0x43: cout << "Floating point R4-type Instruction" << endl;
 			switch (funct3) {
-			
-				case 0x7:
-				 		switch (funct2) {
-							case 0x0: cout << "FMADD.S detected" << endl;
-							break;
-			                        } 
-			                  	break;
+
+			case 0x7:
+				switch (funct2) {
+				case 0x0: cout << "FMADD.S detected" << endl;
+					f[rd] = (f[rs1] * f[rs2]) + f[rs3];  		//FMADD.S 
+					break;
 				}
-			break;		
+				break;
+			}
+			break;
 		case 0x47: cout << "Floating point R4-type Instruction" << endl;
 			switch (funct3) {
-				
-			  	case 0x7:
-				 		switch (funct2) {
-							case 0x0: cout << "FMSUB.S detected" << endl;
-							break;
-			                        	} 
-			                  	break;
-			                  }	
-		case 0x4B: cout << "Floating point R4-type Instruction" << endl;
-			   switch (funct3) {	
-			   	case 0x7:
-				 		switch (funct2) {
-							case 0x0: cout << "FNMSUB.S detected" << endl;
-							break;
-			                        	} 
-			                  	break;
-			                  }
-		case 0x4F: cout << "Floating point R4-type Instruction" << endl;
-			   switch (funct3) {	
-			   	case 0x7:
-				 		switch (funct2) {
-							case 0x0: cout << "FNMADD.S detected" << endl;
-							break;
-			                        	} 
-			                  	break;
-					}
-									
-		case 0x53: cout << "Floating point R-type Instruction" << endl;
-			  switch (funct3) {
-				
-			  	case 0x7:		
-				 		switch (funct7) {
-							case 0x00: cout << "FADD.S detected" << endl;
-							break;
 
-							case 0x04: cout << "FSUB.S detected" << endl;
-							break;
-							
-							case 0x08: cout << "FMUL.S detected" << endl;
-							break;
-
-							case 0x0C: cout << "FDIV.S detected" << endl;
-							break;
-							
-							case 0x2C: cout << "FSQRT.S detected" << endl;
-							break;
-							
-							case 0x60:
-								switch (rs2) { 
-								 	case 0x00: cout << "FCVT.W.S detected" << endl;
-								 	break;
-								 	case 0x01: cout << "FCVT.WU.S detected" << endl;
-								 	break;
-								 	}
-							break;
-							
-							case 0x68:
-								switch (rs2) { 
-								 	case 0x00: cout << "FCVT.S.W detected" << endl;
-								 	break;
-								 	case 0x01: cout << "FCVT.S.WU detected" << endl;
-								 	break;
-								 	}
-							break;
-							
-			  			}
-			  			break;
-				 case 0x0:
-			 			switch (funct7) {
-							case 0x10: cout << "FSGNJ.S detected" << endl;
-							break;
-							
-							case 0x14: cout << "FMIN.S detected" << endl;
-							break;
-							
-							case 0x78: cout << "FMV.X.W detected" << endl;
-							break;
-							
-							case 0x50: cout << ".FLE.S detected" << endl;
-							break;
-							
-							case 0x70: cout << "FMV.W.X detected" << endl;
-							break;
-			  				}
-			  		        break;
-				 case 0x1:
-			 			switch (funct7) {
-							case 0x10: cout << "FSGNJN.S detected" << endl;
-							break;
-							
-							case 0x14: cout << "FMAX.S detected" << endl;
-							break;
-							
-							case 0x50: cout << "FLT.S detected" << endl;
-							break;
-							
-							case 0x70: cout << "FCLASS.S detected" << endl;
-							break;
-			  				}
-			  			break;
-				 case 0x2:
-			 			switch (funct7) {
-							case 0x10: cout << "FSGNJX.S detected" << endl;
-							break;
-							
-							case 0x50: cout << "FEQ.S detected" << endl;
-							break;
-			  				}
-			  			break;
-			  	
-				default: cout << "Opcode doesn't exist" << endl;
-				break;
+			case 0x7:
+				switch (funct2) {
+				case 0x0: cout << "FMSUB.S detected" << endl;
+					f[rd] = (f[rs1] * f[rs2]) - f[rs3];  		//FMSUB.S
+					break;
 				}
+				break;
+			}
+		case 0x4B: cout << "Floating point R4-type Instruction" << endl;
+			switch (funct3) {
+			case 0x7:
+				switch (funct2) {
+				case 0x0: cout << "FNMSUB.S detected" << endl;
+					f[rd] = (-(f[rs1] * f[rs2])) + f[rs3]; 		//FNMSUB.S
+					break;
+				}
+				break;
+			}
+		case 0x4F: cout << "Floating point R4-type Instruction" << endl;
+			switch (funct3) {
+			case 0x7:
+				switch (funct2) {
+				case 0x0: cout << "FNMADD.S detected" << endl;
+					f[rd] = (-(f[rs1] * f[rs2])) - f[rs3]; 		//FNMADD.S
+					break;
+				}
+				break;
+			}
+
+		case 0x53: cout << "Floating point R-type Instruction" << endl;
+			switch (funct3) {
+
+			case 0x7:
+				switch (funct7) {
+				case 0x00: cout << "FADD.S detected" << endl;
+					f[rd] = f[rs1] + f[rs2];					//FADD.S
+					break;
+
+				case 0x04: cout << "FSUB.S detected" << endl;
+					f[rd] = f[rs1] - f[rs2];					//FSUB.S
+					break;
+
+				case 0x08: cout << "FMUL.S detected" << endl;
+					f[rd] = f[rs1] * f[rs2];					//FMUL.S
+					break;
+
+				case 0x0C: cout << "FDIV.S detected" << endl;
+					f[rd] = f[rs1] / f[rs2];					//FDIV.S
+					break;
+
+				case 0x2C: cout << "FSQRT.S detected" << endl;
+					f[rd] = sqrt(f[rs1]);						//FSQRT.S
+					break;
+
+				case 0x60:
+					switch (rs2) {
+					case 0x00: cout << "FCVT.W.S detected" << endl;
+						//operation here
+						break;
+					case 0x01: cout << "FCVT.WU.S detected" << endl;
+						//operation here
+						break;
+					}
+					break;
+
+				case 0x68:
+					switch (rs2) {
+					case 0x00: cout << "FCVT.S.W detected" << endl;
+						f[rd] = float(int32_t(x[rs1]));		//FCVT.S.W
+						break;
+					case 0x01: cout << "FCVT.S.WU detected" << endl;
+						f[rd] = float(uint32_t(x[rs1]));	//FCVT.S.WU
+						break;
+					}
+					break;
+
+				}
+				break;
+			case 0x0:
+				switch (funct7) {
+				case 0x10: cout << "FSGNJ.S detected" << endl;
+					//uint32_t temp1 = 0x80000000; uint32_t temp2 = 0x7FFFFFFF; uint32_t temp = (f[rs2] & temp1) >> 32; f[rd] = (f[rs1] & temp2) | (temp << 31);
+				   //f[rd] = { f[rs2] & 0x80000000 | f[rs1] & 0x7FFFFFFF };	//FSGNJ.S
+					break;
+
+				case 0x14: cout << "FMIN.S detected" << endl;
+					f[rd] = min(f[rs1], f[rs2]);		 //FMIN.S
+					break;
+
+				case 0x78: cout << "FMV.X.W detected" << endl;
+				{
+					uint32_t value = (x[rs1] & 0xFFFFFFFF);
+					float* ptr = reinterpret_cast<float*>(&value);
+					f[rd] = *ptr;			//FMV.W.X
+				}
+
+				break;
+
+				case 0x50: cout << ".FLE.S detected" << endl;
+					if (f[rs1] <= f[rs2]) {
+						f[rd] = 1;
+					}
+					else {					//FLE.S
+						f[rd] = 0;
+					}
+					break;
+
+				case 0x70: cout << "FMV.W.X detected" << endl;
+					//operation here
+					break;
+				}
+				break;
+			case 0x1:
+				switch (funct7) {
+				case 0x10: cout << "FSGNJN.S detected" << endl;
+					//f[rd] = { ((!(f[rs2] & 0x80000000)) | (f[rs1] & 0x7FFFFFFF)) }; //FSGNJN.S
+					break;
+
+				case 0x14: cout << "FMAX.S detected" << endl;
+					f[rd] = max(f[rs1], f[rs2]);		//FMAX.S
+					break;
+
+				case 0x50: cout << "FLT.S detected" << endl;
+					if (f[rs1] < f[rs2]) {
+						f[rd] = 1;
+					}
+					else {					//FLT.S
+						f[rd] = 0;
+					}
+					break;
+
+				case 0x70: cout << "FCLASS.S detected" << endl;
+					//operation here
+					break;
+				}
+				break;
+			case 0x2:
+				switch (funct7) {
+				case 0x10: cout << "FSGNJX.S detected" << endl;
+					//f[rd] = { (((f[rs1] & 0x80000000) ^ (f[rs2] & 0x80000000)) | (f[rs1] & 0x7FFFFFFF)) };	 //FSGNJX.S
+					break;
+
+				case 0x50: cout << "FEQ.S detected" << endl;
+					if (f[rs1] == f[rs2]) {
+						f[rd] = 1;
+					}
+					else {					//FEQ.S
+						f[rd] = 0;
+					}
+					break;
+				}
+				break;
+
+			default: cout << "Opcode doesn't exist" << endl;
+				break;
+			}
 		}
-		cout<<pc<<endl;
+		cout << pc << endl;
 
 		print_regs();
 	}
@@ -707,7 +756,7 @@ int main(int argc, char* argv[]) {
 		outfile << i << " : " << std::hex << std::setw(2) << setfill('0') << static_cast<int>(memory_array[i]) << endl;
 	}
 	outfile.close();
-	if(pc % 4 != 0){
+	if (pc % 4 != 0) {
 		cout << "Unaligned pc" << endl;
 		pc = program_space - 4;
 	}
