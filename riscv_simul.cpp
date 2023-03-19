@@ -194,7 +194,7 @@ int main(int argc, char* argv[]) {
 		memory_array[file_pc + 3] = (instr >> 24) & 0xFF;
 
 		cout << endl << "pc: " << std::hex << std::uppercase << file_pc << " instr: " << std::hex << instr;		// Comment later
-		program_space = file_pc + 4;																// Save Program space
+		program_space = file_pc + 4;											// Save Program space
 	}
 	infile.close();
 	cout << endl << "End of file reading and program saved to memory" << endl;						// Comment later
@@ -312,11 +312,11 @@ int main(int argc, char* argv[]) {
 					break;
 
 				case 0x06: cout << "REM detected" << endl;						//REM detected
-					x[rd] = (x[rs1]) % (uint32_t(x[rs1]));
+					x[rd] = (x[rs1]) % (x[rs2]);
 					break;
 
 				case 0x07: cout << "REMU detected" << endl;						//REMU detected
-					x[rd] = (x[rs1]) % (uint32_t(x[rs2]));
+					x[rd] = (uint32_t(x[rs1])) % (uint32_t(x[rs2]));
 					break;
 				}
 				break;
@@ -405,7 +405,7 @@ int main(int argc, char* argv[]) {
 				pc = pc + 4;
 				break;
 
-			case 0x03: cout << "SLTIU detected" << endl;			// SLTIU detected (I-type)
+			case 0x03: cout << "SLTIU detected" << endl;				// SLTIU detected (I-type)
 				if (uint32_t(x[rs1]) < uint32_t(II))
 					x[rd] = 1;
 				else
@@ -428,19 +428,19 @@ int main(int argc, char* argv[]) {
 				pc = pc + 4;
 				break;
 
-			case 0x01: cout << "SLLI detected" << endl;             //SLLI detected (I-type)
+			case 0x01: cout << "SLLI detected" << endl;             		//SLLI detected (I-type)
 				x[rd] = x[rs1] << rs2;
 				pc = pc + 4;
 				break;
 
 			case 0x05:
 				switch (funct7) {
-				case 0x00: cout << "SRLI detected" << endl;         //SRLI detected (I-type)
+				case 0x00: cout << "SRLI detected" << endl;         		//SRLI detected (I-type)
 					x[rd] = uint32_t(x[rs1]) >> rs2;
 					pc = pc + 4;
 					break;
 
-				case 0x20: cout << "SRAI detected" << endl;         //SRLI detected (I-type)
+				case 0x20: cout << "SRAI detected" << endl;         		//SRLI detected (I-type)
 					x[rd] = int32_t(x[rs1]) >> rs2;
 					pc = pc + 4;
 					break;
@@ -451,7 +451,7 @@ int main(int argc, char* argv[]) {
 		case 0x67: cout << "I-type Instruction" << endl;
 			// only JALR!
 			II = immediate(opcode, curr_instr);
-			cout << "JALR detected" << endl;						// JALR detected (I-type)
+			cout << "JALR detected" << endl;					// JALR detected (I-type)
 			x[rd] = pc + 4;
 			pc = ((x[rs1] + II) & 0xFFFFFFFE);
 			break;
@@ -671,11 +671,11 @@ int main(int argc, char* argv[]) {
 				case 0x68:
 					switch (rs2) {
 					case 0x00: cout << "FCVT.S.W detected" << endl;
-						f[rd] = float(int32_t(x[rs1]));		//FCVT.S.W
+						f[rd] = float(int32_t(x[rs1]));				//FCVT.S.W
 						pc = pc + 4;
 						break;
 					case 0x01: cout << "FCVT.S.WU detected" << endl;
-						f[rd] = float(uint32_t(x[rs1]));	//FCVT.S.WU
+						f[rd] = float(uint32_t(x[rs1]));			//FCVT.S.WU
 						pc = pc + 4;
 						break;
 					}
@@ -687,12 +687,12 @@ int main(int argc, char* argv[]) {
 				switch (funct7) {
 				case 0x10: cout << "FSGNJ.S detected" << endl;
 					//uint32_t temp1 = 0x80000000; uint32_t temp2 = 0x7FFFFFFF; uint32_t temp = (f[rs2] & temp1) >> 32; f[rd] = (f[rs1] & temp2) | (temp << 31);
-				   //f[rd] = { f[rs2] & 0x80000000 | f[rs1] & 0x7FFFFFFF };	//FSGNJ.S
+				   //f[rd] = { f[rs2] & 0x80000000 | f[rs1] & 0x7FFFFFFF };		//FSGNJ.S
 					pc = pc + 4;
 					break;
 
 				case 0x14: cout << "FMIN.S detected" << endl;
-					f[rd] = min(f[rs1], f[rs2]);		 //FMIN.S
+					f[rd] = min(f[rs1], f[rs2]);		 			//FMIN.S
 					pc = pc + 4;
 					break;
 
@@ -700,7 +700,7 @@ int main(int argc, char* argv[]) {
 				{
 					uint32_t value = (x[rs1] & 0xFFFFFFFF);
 					float* ptr = reinterpret_cast<float*>(&value);
-					f[rd] = *ptr;			//FMV.W.X
+					f[rd] = *ptr;							//FMV.W.X
 				}
 				pc = pc + 4;
 				break;
@@ -709,7 +709,7 @@ int main(int argc, char* argv[]) {
 					if (f[rs1] <= f[rs2]) {
 						f[rd] = 1;
 					}
-					else {					//FLE.S
+					else {								//FLE.S
 						f[rd] = 0;
 					}
 					pc = pc + 4;
@@ -724,12 +724,12 @@ int main(int argc, char* argv[]) {
 			case 0x1:
 				switch (funct7) {
 				case 0x10: cout << "FSGNJN.S detected" << endl;
-					//f[rd] = { ((!(f[rs2] & 0x80000000)) | (f[rs1] & 0x7FFFFFFF)) }; //FSGNJN.S
+					//f[rd] = { ((!(f[rs2] & 0x80000000)) | (f[rs1] & 0x7FFFFFFF)) }; 	//FSGNJN.S
 					pc = pc + 4;
 					break;
 
 				case 0x14: cout << "FMAX.S detected" << endl;
-					f[rd] = max(f[rs1], f[rs2]);		//FMAX.S
+					f[rd] = max(f[rs1], f[rs2]);						//FMAX.S
 					pc = pc + 4;
 					break;
 
@@ -737,7 +737,7 @@ int main(int argc, char* argv[]) {
 					if (f[rs1] < f[rs2]) {
 						f[rd] = 1;
 					}
-					else {					//FLT.S
+					else {									//FLT.S
 						f[rd] = 0;
 					}
 					pc = pc + 4;
@@ -760,7 +760,7 @@ int main(int argc, char* argv[]) {
 					if (f[rs1] == f[rs2]) {
 						f[rd] = 1;
 					}
-					else {					//FEQ.S
+					else {									//FEQ.S
 						f[rd] = 0;
 					}
 					pc = pc + 4;
