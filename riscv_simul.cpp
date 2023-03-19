@@ -561,14 +561,42 @@ int main(int argc, char* argv[]) {
 		default: cout << "Opcode doesn't exist" << endl;
 			break;
 		}
-<<<<<<< HEAD
 		case 0x07: cout << "Floating point I-type Instruction" << endl;
 			switch (funct3) {
-				case 0x2: "FLW detected"
+				case 0x2: cout << "FLW detected" << endl;
+					break;
+				}
 		case 0x27: cout << "Floating point S-type Instruction" << endl;
+			switch (funct3) {
+				case 0x2: cout << "FSW detected" << endl;
+					break;
+				}
 		case 0x43: cout << "Floating point R4-type Instruction" << endl;
+			switch (funct3) {
+			
+				case 0x7:
+				 		switch (funct2) {
+							case 0x0: cout << "FMADD.S detected" << endl;
+								break;
+			                        	} 
+			                  break;
+				}		
 		case 0x47: cout << "Floating point R4-type Instruction" << endl;
+			  case 0x7:
+				 		switch (funct2) {
+							case 0x0: cout << "FMSUB.S detected" << endl;
+								break;
+			                        	} 
+			                  break;
+				}
 		case 0x4B: cout << "Floating point R4-type Instruction" << endl;
+			   case 0x7:
+				 		switch (funct2) {
+							case 0x0: cout << "FMADD.S detected" << endl;
+								break;
+			                        	} 
+			                  break;
+				}	
 		case 0x4F: cout << "Floating point R4-type Instruction" << endl;
 		case 0x53: cout << "Floating point R-type Instruction" << endl;
 		cout<<pc<<endl;
