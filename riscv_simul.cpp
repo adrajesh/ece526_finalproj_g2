@@ -276,8 +276,7 @@ int main(int argc, char* argv[]) {
 				}
 				break;
 				
-				//RISC-V 32I- M Standard Extension for Integer Multiplication and Division (Extra Credit)
-				
+			//RISC-V 32I- M Standard Extension for Integer Multiplication and Division (Extra Credit)
 			case 0x01:
 				switch (funct3) {
 				case 0x00: cout << "MUL detected" << endl; 						//MUL detected (R-type RV32M)
@@ -319,8 +318,7 @@ int main(int argc, char* argv[]) {
 				break;
 			
 				
-				//RISC-V 32I- M Standard Extension for Integer Multiplication and Division (Extra Credit)
-
+			//RISC-V 32I- M Standard Extension for Integer Multiplication and Division (Extra Credit)
 			case 0x20:
 				switch (funct3) {
 				case 0x00:	cout << "SUB detected" << endl;			// SUB detected (R-type)
@@ -347,28 +345,24 @@ int main(int argc, char* argv[]) {
 				break;
 
 			case 0x01: cout << "LH detected" << endl;				// LH detected (I-type)
-				if((II + x[rs1])%2==0)
-				{
-				x[rd] = (mem_acc((II + x[rs1]), 2,1));
-				pc = pc + 4;
+				if((II + x[rs1])%2==0){
+					x[rd] = (mem_acc((II + x[rs1]), 2,1));
+					pc = pc + 4;
 				}
-				else
-				{
-				cout<<"Unaligned mem reference"<<endl;
-				pc = program_space - 4;	
+				else{
+					cout<<"Unaligned mem reference"<<endl;
+					pc = program_space - 4;	
 				}
 				break;
 
 			case 0x02: cout << "LW detected" << endl;				// LW detected (I-type)
-				if((II + x[rs1])%4==0)
-				{
-				x[rd] = (mem_acc((II + x[rs1]), 4,1));
-				pc = pc + 4;
+				if((II + x[rs1])%4==0){
+					x[rd] = (mem_acc((II + x[rs1]), 4,1));
+					pc = pc + 4;
 				}
-				else
-				{	
-				cout<<"Unaligned mem reference"<<endl;
-				pc = program_space - 4;
+				else{	
+					cout<<"Unaligned mem reference"<<endl;
+					pc = program_space - 4;
 				}
 				break;
 
@@ -378,15 +372,13 @@ int main(int argc, char* argv[]) {
 				break;
 
 			case 0x05: cout << "LHU detected" << endl;				// LHU detected (I-type)
-				if((II + x[rs1])%2==0)
-				{
-				x[rd] = (mem_acc((II + x[rs1]), 2,0));
-				pc = pc + 4;
+				if((II + x[rs1])%2==0){
+					x[rd] = (mem_acc((II + x[rs1]), 2,0));
+					pc = pc + 4;
 				}
-				else
-				{
-				cout<<"Unaligned mem reference"<<endl;
-				pc = program_space - 4;	
+				else{
+					cout<<"Unaligned mem reference"<<endl;
+					pc = program_space - 4;	
 				}
 				break;
 			}
@@ -567,7 +559,6 @@ int main(int argc, char* argv[]) {
 		default: cout << "Opcode doesn't exist" << endl;
 			break;
 		}
-		cout<<pc<<endl;
 		print_regs();
 	}
 	// For printing the contents of memory into a file - memory_array.txt
@@ -575,5 +566,9 @@ int main(int argc, char* argv[]) {
 		outfile << i << " : " << std::hex << std::setw(2) << setfill('0') << static_cast<int>(memory_array[i]) << endl;
 	}
 	outfile.close();
+	if(pc % 4 != 0){
+		cout << "Unaligned pc" << endl;
+		pc = program_space - 4;
+	}
 	return 0;
 }
