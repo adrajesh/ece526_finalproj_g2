@@ -69,6 +69,14 @@ int immediate(uint32_t opcode, uint32_t instr){
 				}
 				cout<<"J-immediate: "<<I<<endl;
 				break;
+					
+		case 0x07: I = ((instr & (0xFFF00000))>>20);
+				cout<<"Floating point I-immediate"<<I<<endl;
+		  		break;
+		  		
+		case 0x27: I = ((instr & (0x7F00000))>>25) | ((instr & (0x00000F80))>>7);
+				cout << "floating point S-immediate"<<I<<endl;
+				break;
 	}
 	return I;	
 }

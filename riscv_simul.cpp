@@ -203,6 +203,8 @@ int main(int argc, char* argv[]) {
 		rd = (curr_instr & (0xF80)) >> 7;							// bits [11:7]
 		rs1 = (curr_instr & (0xF8000)) >> 15;						// bits [19:15]
 		rs2 = (curr_instr & (0x1F00000)) >> 20;						// bits [24:20]
+		funct2 = (curr_instr & (0x06000000)) >> 25;                                        // bits [26:25]
+		rs3 =  (curr_instr & (0xF8000000)) >> 27;
 		// We have to calculate immediate fields also - refer page 16/17
 		
 		x[0] = 0;
@@ -487,6 +489,15 @@ int main(int argc, char* argv[]) {
 		default: cout << "Opcode doesn't exist" << endl;
 			break;
 		}
+		case 0x07: cout << "Floating point I-type Instruction" << endl;
+			switch (funct3) {
+				case 0x2: "FLW detected"
+		case 0x27: cout << "Floating point S-type Instruction" << endl;
+		case 0x43: cout << "Floating point R4-type Instruction" << endl;
+		case 0x47: cout << "Floating point R4-type Instruction" << endl;
+		case 0x4B: cout << "Floating point R4-type Instruction" << endl;
+		case 0x4F: cout << "Floating point R4-type Instruction" << endl;
+		case 0x53: cout << "Floating point R-type Instruction" << endl;
 		cout<<pc<<endl;
 		print_regs();
 	}
