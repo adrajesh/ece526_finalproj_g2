@@ -1,0 +1,13 @@
+   8 0000 130101FE              addi    sp,sp,-32
+   9 0004 33052100              add     a0,sp,sp
+  10 0008 B7F5FF0F              lui     a1,65535
+  11 000c 3386A500              add     a2,a1,a0
+  12 0010 2320C100              sw      a2,0(sp)
+  13 0014 2303C100              sb      a2,6(sp)
+  14 0018 03070000              lb      a4,0(zero)
+  15 001c 03073000              lb      a4,3(zero)
+  16 0020 83470000              lbu     a5,0(zero)
+  17 0024 83473000              lbu     a5,3(zero)
+  18 0028 67800000              jr      ra
+  20                            .ident  "GCC: (GNU) 9.2.0"
+  21                            .section        .note.GNU-stack,"",@progbits
