@@ -106,6 +106,7 @@ void parse_line(std::string access, unsigned int arr[]) {
 
 void print_regs() {
 	// Print all contents of 32 register
+	cout << endl;
 	int count = 0;
 	for (int i = 0; i < 32; i++) {
 		cout << "x[" << std::dec << i << "]" << " - " << std::hex << std::setw(8) << setfill(' ') << x[i] << " \t ";
@@ -115,8 +116,12 @@ void print_regs() {
 		}
 	}
 	cout << endl;
+}
+
+void print_floatregs() {
+	// Print all contents of 32 floating register
 	cout << endl;
-	count = 0;
+	int count = 0;
 	for (int i = 0; i < 32; i++) {
 		cout << "f[" << std::dec << i << "]" << " - " << std::hex << std::setw(8) << setfill(' ') << f[i] << " \t ";
 		count++;
@@ -187,7 +192,8 @@ int main(int argc, char* argv[]) {
 		break;
 	default: usage();
 	}
-	cout << endl << "WELCOME TO RISC-V SIMULATOR" << endl;
+	cout << endl << "******************WELCOME TO RISC-V SIMULATOR******************" << endl;
+	cout << endl;
 	cout << "Program Counter - " << std::hex << pc << endl;
 	cout << "Stack Address - " << sp << endl;
 	cout << "Debug mode - " << DebugMode << endl;
@@ -508,6 +514,7 @@ int main(int argc, char* argv[]) {
 					pc = pc + BI;
 				else
 					pc = pc + 4;
+				system("read");
 				break;
 
 			case 0x04: cout << "BLT detected" << endl;				// BLT detected (B-type)
@@ -801,21 +808,25 @@ int main(int argc, char* argv[]) {
 			}
 		}
 		print_regs();
+		if(opcode == 0x07 || opcode == 0x27 || opcode == 0x43 || opcode == 0x47 || opcode == 0x4B || opcode == 0x4F || opcode == 0x53)
+			print_floatregs();
+		cin.get();
+		if (pc % 4 != 0) {
+			cout << "Unaligned pc" << endl;
+			x[1] = 0;
+			pc = program_space - 4;
+		}
 	}
 	// For printing the contents of memory into a file - memory_array.txt
 	for (int i = 65535; i >= 0; i--) {
 		outfile << i << " : " << std::hex << std::setw(2) << setfill('0') << static_cast<int>(memory_array[i]) << endl;
 	}
 	outfile.close();
-	if (pc % 4 != 0) {
-		cout << "Unaligned pc" << endl;
-		x[1] = 0;
-		pc = program_space - 4;
-	}
-	
+	cout << endl;
+	cout << "************************************DONE************************************" << endl;
 	cout << endl << "Last PC : " << pc << endl;
-	cout << endl << "***********Registers***************" << endl;
+	cout << endl << "******************************Registers***********************************" << endl;
 	print_regs();
-	cout << "***********END***************" << endl;
+	cout << "************************************END************************************" << endl;
 	return 0;
 }
