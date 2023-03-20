@@ -24,7 +24,6 @@ bool SingleStep;
 int pc; 				// program counter
 int sp;					// stack address
 int file;
-// uint32_t registers[32];
 uint8_t memory_array[65536] = {};		// Memory in bytes
 uint32_t x[32] = {}; 					// r0 is zero
 float f[32] = {};						//floating point registers
@@ -80,7 +79,7 @@ void usage()
 	std::cerr << "program counter \t- default is 0" << endl;
 	std::cerr << "stck address \t\t- default is 65536" << endl;
 	std::cerr << "mode \t\t\t- default is silent mode" << endl;
-	std::cerr << "\t\t\t  pass 'normal' to enable normal mode " << endl;							// we can later add normal mode also if needed
+	std::cerr << "\t\t\t  pass 'normal' to enable normal mode " << endl;							
 	std::cerr << "\t\t\t  pass 'debug' to enable debug mode"<< endl;
 	std::cerr << "step execution enable \t- default is diabled. '1' to enable"<<endl<<endl;
 	std::cerr << "Example - \'riscv_simul abcd.mem 4 65536 debug 1\'" << endl;
@@ -143,10 +142,19 @@ void print_floatregs() {
 	cout << endl;
 }
 
+void print_mem() {
+	std::ofstream outfile("memory_array.txt");
+// For printing the contents of memory into a file - memory_array.txt
+	for (int i = 65535; i >= 0; i--) {
+		outfile << std::hex << i << " : " << std::setw(2) << setfill('0') << static_cast<int>(memory_array[i]) << endl;
+	}
+	outfile.close();
+}
+
 int main(int argc, char* argv[]) {
 	std::string line;
 	std::ifstream infile;
-	std::ofstream outfile("memory_array.txt");
+//	std::ofstream outfile("memory_array.txt");
 	unsigned int trace[2];
 	uint32_t instr, curr_instr;
 	uint32_t file_pc;
@@ -262,13 +270,16 @@ int main(int argc, char* argv[]) {
 		if(DebugMode){
 		cout << endl << "pc: " << std::hex << std::uppercase << file_pc << " instr: " << std::hex << instr;
 		}
-		program_space = file_pc + 4;						
+		program_space = file_pc + 4;
 	}
 	infile.close();
+
 	if(DebugMode) {
 	cout << endl << "End of file reading and program saved to memory" << endl;									// Comment later
 	}
-	
+	if(SingleStep) 
+		print_mem();
+
 	while (pc < program_space)
 	{
 		curr_instr = memory_array[pc] | (memory_array[pc + 1] << 8) | (memory_array[pc + 2] << 16) | (memory_array[pc + 3] << 24);
@@ -538,18 +549,30 @@ int main(int argc, char* argv[]) {
 			case 0x00: if(DebugMode | NormalMode) cout << "SB detected" << endl;				// SB detected (S-type)
 				mem_wr((SI + x[rs1]), 1, x[rs2]);
 				pc = pc + 4;
+				if(SingleStep) {
+					cout<< "Memory array updated"<<endl;
+					print_mem();
+				}
 				break;
 
 			case 0x01: if(DebugMode | NormalMode) cout << "SH detected" << endl;				// SH detected (S-type)
 				// Operation here
 				mem_wr((SI + x[rs1]), 2, x[rs2]);
 				pc = pc + 4;
+				if(SingleStep) {
+					print_mem();
+					cout<< "Memory array updated"<<endl;
+				}
 				break;
 
 			case 0x02: if(DebugMode | NormalMode) cout << "SW detected" << endl;				// SW detected (S-type)
 				// Operation here
 				mem_wr((SI + x[rs1]), 4, x[rs2]);
 				pc = pc + 4;
+				if(SingleStep) {
+					print_mem();
+					cout<< "Memory array updated"<<endl;
+				}
 				break;
 			}
 			break;
@@ -675,6 +698,10 @@ int main(int argc, char* argv[]) {
 				if(DebugMode) cout << "F-immediate: " << FI << endl;							
 				mem_wr((FI + x[rs1]), 4, f[rs2]);
 				pc = pc + 4;
+				if(SingleStep) {
+					print_mem();
+					cout<< "Memory array updated"<<endl;
+				}
 				break;
 			}
 			break;
@@ -886,11 +913,8 @@ int main(int argc, char* argv[]) {
 			pc = program_space - 4;
 		}
 	}
-	// For printing the contents of memory into a file - memory_array.txt
-	for (int i = 65535; i >= 0; i--) {
-		outfile << i << " : " << std::hex << std::setw(2) << setfill('0') << static_cast<int>(memory_array[i]) << endl;
-	}
-	outfile.close();
+
+	print_mem();
 	cout << endl;
 	cout << "************************************DONE************************************" << endl;
 	if (DebugMode)
