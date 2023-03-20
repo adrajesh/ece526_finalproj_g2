@@ -108,7 +108,17 @@ void print_regs() {
 	// Print all contents of 32 register
 	int count = 0;
 	for (int i = 0; i < 32; i++) {
-		cout << "x[" << std::dec << i << "]" << " - " << std::hex << std::setw(8) << setfill('0') << x[i] << " \t ";
+		cout << "x[" << std::dec << i << "]" << " - " << std::hex << std::setw(8) << setfill(' ') << x[i] << " \t ";
+		count++;
+		if (count % 8 == 0) {
+			cout << endl;
+		}
+	}
+	cout << endl;
+	cout << endl;
+	count = 0;
+	for (int i = 0; i < 32; i++) {
+		cout << "f[" << std::dec << i << "]" << " - " << std::hex << std::setw(8) << setfill(' ') << f[i] << " \t ";
 		count++;
 		if (count % 8 == 0) {
 			cout << endl;
@@ -125,7 +135,7 @@ int main(int argc, char* argv[]) {
 	uint32_t instr, curr_instr;
 	uint32_t file_pc;
 	uint32_t opcode, funct3, funct7, funct2, rd, rs1, rs2, rs3;
-	int32_t II, SI, BI, UI, JI; 						// Immediate fields 
+	int32_t II, SI, BI, UI, JI, FI; 						// Immediate fields 
 	bool MSBimmediate;
 	uint32_t memory_loc;
 	int bytes;
@@ -355,6 +365,7 @@ int main(int argc, char* argv[]) {
 				}
 				else {
 					cout << "Unaligned mem reference" << endl;
+					x[1] = 0;
 					pc = program_space - 4;
 				}
 				break;
@@ -366,6 +377,7 @@ int main(int argc, char* argv[]) {
 				}
 				else {
 					cout << "Unaligned mem reference" << endl;
+					x[1] = 0;
 					pc = program_space - 4;
 				}
 				break;
@@ -382,6 +394,7 @@ int main(int argc, char* argv[]) {
 				}
 				else {
 					cout << "Unaligned mem reference" << endl;
+					x[1] = 0;
 					pc = program_space - 4;
 				}
 				break;
@@ -528,24 +541,21 @@ int main(int argc, char* argv[]) {
 			}
 			break;
 
-		case 0x37: cout << "U-type Instruction" << endl;
-			// LUI
+		case 0x37: cout << "U-type Instruction" << endl;						// LUI
 			UI = immediate(opcode, curr_instr);
 			cout << "LUI detected" << endl;
 			x[rd] = UI;
 			pc = pc + 4;
 			break;
 
-		case 0x17: cout << "U-type Instruction" << endl;
-			// AUIPC
+		case 0x17: cout << "U-type Instruction" << endl;						// AUIPC
 			UI = immediate(opcode, curr_instr);
 			cout << "AUIPC detected" << endl;
 			x[rd] = pc + UI;
 			pc = pc + 4;
 			break;
 
-		case 0x6F: cout << "J-type Instruction" << endl;
-			// JAL
+		case 0x6F: cout << "J-type Instruction" << endl;						// JAL
 			JI = immediate(opcode, curr_instr);
 			cout << "JAL detected" << endl;
 			x[rd] = pc + 4;
@@ -563,16 +573,34 @@ int main(int argc, char* argv[]) {
 
 		case 0x07: cout << "Floating point I-type Instruction" << endl;
 			switch (funct3) {
-			case 0x2: cout << "FLW detected" << endl;
-				//operation here
-				pc = pc + 4;
+			case 0x2: cout << "FLW detected" << endl;							//FLW
+				FI = curr_instr >> 20;
+				if(FI>>11){
+					FI = FI | 0xFFFFF000;
+				}
+				cout << "F-immediate: " << FI <<endl;
+				if ((FI + x[rs1]) % 4 == 0) {
+					f[rd] = (mem_acc((FI + x[rs1]), 4, 1));
+					pc = pc + 4;
+				}
+				else {
+					cout << "Unaligned mem reference" << endl;
+					x[1] = 0;
+					pc = program_space - 4;
+				}
+				
 				break;
 			}
 			break;
 		case 0x27: cout << "Floating point S-type Instruction" << endl;
 			switch (funct3) {
-			case 0x2: cout << "FSW detected" << endl;
-				//operation here
+			case 0x2: cout << "FSW detected" << endl;         						//FSW
+				FI = ((curr_instr & 0x00000F80) >> 7) | ((curr_instr & 0xFE000000) >> 20);
+				if(FI>>11){
+					FI = FI | 0xFFFFF000;
+				}
+				cout << "F-immediate: " << FI << endl;							
+				mem_wr((FI + x[rs1]), 4, f[rs2]);
 				pc = pc + 4;
 				break;
 			}
@@ -628,7 +656,7 @@ int main(int argc, char* argv[]) {
 		case 0x53: cout << "Floating point R-type Instruction" << endl;
 			switch (funct3) {
 
-			case 0x7:
+			case 0x07:
 				switch (funct7) {
 				case 0x00: cout << "FADD.S detected" << endl;
 					f[rd] = f[rs1] + f[rs2];					//FADD.S
@@ -772,18 +800,22 @@ int main(int argc, char* argv[]) {
 				break;
 			}
 		}
-		cout << pc << endl;
-
 		print_regs();
 	}
 	// For printing the contents of memory into a file - memory_array.txt
-	for (int i = 0; i < 65536; i++) {
+	for (int i = 65535; i >= 0; i--) {
 		outfile << i << " : " << std::hex << std::setw(2) << setfill('0') << static_cast<int>(memory_array[i]) << endl;
 	}
 	outfile.close();
 	if (pc % 4 != 0) {
 		cout << "Unaligned pc" << endl;
+		x[1] = 0;
 		pc = program_space - 4;
 	}
+	
+	cout << endl << "Last PC : " << pc << endl;
+	cout << endl << "***********Registers***************" << endl;
+	print_regs();
+	cout << "***********END***************" << endl;
 	return 0;
 }
