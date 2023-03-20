@@ -503,49 +503,56 @@ int main(int argc, char* argv[]) {
 			BI = immediate(opcode, curr_instr);
 			switch (funct3) {
 			case 0x00:	cout << "BEQ detected" << endl;				// BEQ detected (B-type)
-				if (x[rs1] == x[rs2])
+				if (x[rs1] == x[rs2]){
 					cout << "Branch Taken" << endl;
 					pc = pc + BI;
+				}
 				else
 					pc = pc + 4;
 				break;
 
 			case 0x01: cout << "BNE detected" << endl;				// BNE detected (B-type)
-				if (x[rs1] != x[rs2])
+				if (x[rs1] != x[rs2]){
 					cout << "Branch Taken" << endl;
 					pc = pc + BI;
+				}
 				else
 					pc = pc + 4;
 				system("read");
 				break;
 
 			case 0x04: cout << "BLT detected" << endl;				// BLT detected (B-type)
-				if (int32_t(x[rs1]) < int32_t(x[rs2]))
+				if (int32_t(x[rs1]) < int32_t(x[rs2])){
+					cout << "Branch Taken" << endl;
 					pc = pc + BI;
+				}
 				else
 					pc = pc + 4;
 				break;
 
 			case 0x05: cout << "BGE detected" << endl;				// BGE detected (B-type)
-				if (int32_t(x[rs1]) >= int32_t(x[rs2]))
+				if (int32_t(x[rs1]) >= int32_t(x[rs2])){
 					cout << "Branch Taken" << endl;
 					pc = pc + BI;
+				}
 				else
 					pc = pc + 4;
 				break;
 
 			case 0x06: cout << "BLTU detected" << endl;				// BLTU detected (B-type)
-				if ((uint32_t(x[rs1])) < (uint32_t(x[rs2])))
+				if ((uint32_t(x[rs1])) < (uint32_t(x[rs2]))){
 					cout << "Branch Taken" << endl;
 					pc = pc + BI;
+				}
 				else
 					pc = pc + 4;
 				break;
 
 			case 0x07: cout << "BGEU detected" << endl;				// BGEU detected (B-type)
-				if ((uint32_t(x[rs1])) >= (uint32_t(x[rs2])))
+				if ((uint32_t(x[rs1])) >= (uint32_t(x[rs2]))){
 					cout << "Branch Taken" << endl;
 					pc = pc + BI;
+				}
 				else
 					pc = pc + 4;
 				break;
